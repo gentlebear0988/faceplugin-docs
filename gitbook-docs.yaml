@@ -1,0 +1,11 @@
+$schema: https://api.gitbook.com/gitbook-docs.yaml
+site:
+  title: Faceplugin Docs
+  structure:
+    - type: space
+      key: space-1
+      title: Faceplugin Docs
+      path: faceplugin-docs
+      default: true
+      content:
+        directory: ./faceplugin-docs
