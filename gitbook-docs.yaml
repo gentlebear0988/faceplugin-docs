@@ -1,10 +1,10 @@
 $schema: https://api.gitbook.com/gitbook-docs.yaml
 site:
-  title: Faceplugin Docs
+  title: Faceplugin on-premise Face Recognition, Liveness, and ID Document SDK docs
   structure:
     - type: space
       key: space-1
-      title: Faceplugin Docs
+      title: Faceplugin SDK documentation
       path: faceplugin-docs
       default: true
       content:
