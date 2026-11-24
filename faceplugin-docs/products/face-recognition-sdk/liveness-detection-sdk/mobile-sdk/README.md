@@ -49,7 +49,7 @@ Yes. Liveness detection runs entirely on the device.
 
 ### Related documentation
 
-* [Capabilities](https://github.com/gentlebear0988/temp-docs/tree/main/faceplugin-docs/liveness-detection-sdk/capabilities.md) · [Faceplugin Face Liveness Detection Server SDK](../server-sdk/) · [Face Liveness Detection SDK](../) · [Glossary](../../../../help/resources/glossary.md)
+* [Capabilities](../../capabilities.md) · [Faceplugin Face Liveness Detection Server SDK](../server-sdk/) · [Face Liveness Detection SDK](../) · [Glossary](../../../../help/resources/glossary.md)
 * [Face Recognition Mobile SDK](../../recognition-and-liveness/mobile-sdk/)
 * [Request a License](../../../../help/request-a-license-and-support.md) · [Status codes](../../../../help/resources/status-codes.md)
 * [Combining products (eKYC)](../../../../getting-started/choose-a-product.md) · [SDK comparison](../../../../help/comparisons/)

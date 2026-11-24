@@ -30,24 +30,34 @@ layout:
 
 Fully on-premise **Face Recognition SDK for Android**. Detect faces, extract templates you store yourself, match 1:1 or live 1:N, and check passive 2D liveness on the device. Images never leave the phone.
 
-Public class: `com.faceplugin.facerecognitionsdk.FaceRecognitionSDK`. Demo tiles: Enroll, Identify, Capture, Attribute, Settings, About.
+You integrate through **`face-recognition-kit`**: `FaceEngine` for the lifecycle, `FaceGallery` for enrol and 1:N identify, `FaceDetector` for a single image, and `FaceLimits` for the thresholds. `face-recognition-capture` adds the guided capture screen. The demo app has five tabs — Identify, People, Attribute, Liveness and Settings — and is built on exactly these libraries.
 
 ### Code <a href="#setup" id="setup"></a>
 
-{% embed url="https://github.com/Faceplugin-ltd/FaceRecognition-Android" %}
+{% embed url="https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Android" %}
 
 ### Setup <a href="#setup" id="setup"></a>
 
-1. Copy the SDK (`libfacesdk` folder) to the `root` folder in your project. Place `facerecognitionsdk.aar` from [Google Drive](https://drive.google.com/drive/folders/1kpzYVv9Gbm_pEpDe9-x7FGB4NWZzvez0) inside `libfacesdk/` (next to `libfacesdk/build.gradle`).
-2. Add SDK to the project in `settings.gradle`
+You integrate from the repository itself. There is no Maven coordinate and no package-server dependency.
+
+1. Clone the repository, and download `facerecognitionsdk.aar` from the [GitHub release](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Android/releases/tag/latest) into `libs/`:
+
+```
+FaceRecognition-LivenessDetection-Android/
+└── libs/
+    └── facerecognitionsdk.aar
+```
+
+2. Copy the two library modules into your project, and add them in `settings.gradle`
 
 ```
 rootProject.name = "YourProjectName"
 include ':app'
-include ':libfacesdk'
+include ':face-recognition-kit'
+include ':face-recognition-capture'   // optional capture coach
 ```
 
-3. Add dependency to your `app/build.gradle`
+3. Add the dependencies to your `app/build.gradle`. The app supplies the engine, because an Android library cannot package a local `.aar`.
 
 ```
 android {
@@ -55,16 +65,24 @@ android {
         minSdk 24
         ndk { abiFilters 'arm64-v8a', 'armeabi-v7a' }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
     packaging {
         jniLibs { useLegacyPackaging = true }
     }
 }
 dependencies {
-    implementation project(path: ':libfacesdk')
+    implementation project(':face-recognition-kit')
+    implementation project(':face-recognition-capture')
+    implementation files(rootProject.file('libs/facerecognitionsdk.aar'))
 }
 ```
 
-4. Add camera / gallery permissions in `AndroidManifest.xml`. Call **setActivation → init** on a **background** thread. Keep the demo package name **`com.faceplugin.facerecognitionsdk`**. Request a new license key for your own app.
+4. Add camera / gallery permissions in `AndroidManifest.xml`. Start the engine once per process on a **background** thread. Keep the demo `applicationId` **`com.faceplugin.facerecognitionsdk`** while you use the bundled key, and request a new license key for your own app.
+
+The engine is about 80 MB, so use ABI splits or an app bundle for release builds.
 
 {% hint style="info" %}
 Serialize native calls on one thread. The engine is not concurrent. First `init` unpacks on-device models (a few seconds).
@@ -72,7 +90,171 @@ Serialize native calls on one thread. The engine is not concurrent. First `init`
 
 Status codes: **0** Success (`SDK_SUCCESS`), **1** Invalid license, **2** Expired, **3** Not activated, **4** Init failed.
 
-### APIs
+### Quick start
+
+Everything below is the **kit** API — `face-recognition-kit`, the library the demo app itself is built on. It owns the engine lifecycle, serializes every native call, and keeps the enrolled people in SQLite for you. The raw engine is underneath it, documented in [Engine API reference](#engine-api-reference), but most apps never touch it.
+
+#### 1. Start the engine once per process
+
+```kotlin
+class App : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        FaceEngine.start(this, BuildConfig.FACEPLUGIN_LICENSE) { code ->
+            // code == 0 when the engine is ready. Activation and model loading
+            // already happened on the engine's own thread.
+        }
+    }
+}
+```
+
+Watch the state from any screen, and keep the camera disabled until it is ready:
+
+```kotlin
+FaceEngine.addListener { state ->
+    when (state) {
+        FaceEngine.State.READY -> enableCamera()
+        FaceEngine.State.LOADING -> showSpinner()
+        FaceEngine.State.NOT_ACTIVATED,
+        FaceEngine.State.LICENSE_INVALID,
+        FaceEngine.State.LICENSE_EXPIRED -> showLicenseError(FaceEngine.stateMessage(state))
+        else -> showLicenseError(FaceEngine.stateMessage(state))
+    }
+}
+
+FaceEngine.isReady                 // poll instead, if you prefer
+FaceEngine.licenseStatus()         // what the key unlocks
+FaceEngine.machineCode(context)    // send this when you request a key
+```
+
+#### 2. Set your thresholds once
+
+`FaceLimits` carries every threshold the kit uses, so the library never reads your settings store:
+
+```kotlin
+val limits = FaceLimits(
+    match = 0.80f,      // lowest similarity that counts as the same person
+    liveness = 0.50f,   // lowest liveness score that counts as a live face
+    yaw = 20f, roll = 20f, pitch = 20f,
+)
+
+limits.isLive(face.liveness)                       // one rule, used everywhere
+limits.poseOk(face.yaw, face.roll, face.pitch)
+limits.matches(similarity)
+```
+
+`FaceLimits.DEFAULT` is the engine's operating point. Pass the same instance to enroll, identify and the capture screen so they cannot disagree.
+
+#### 3. Enrol a person
+
+```kotlin
+// Off the main thread — FaceEngine.worker is one.
+when (val outcome = FaceGallery.get(context).enroll("Mina Ortiz", "Front desk", photo, limits)) {
+    is EnrollOutcome.Enrolled -> {
+        val person = outcome.record          // id, name, note, photo path
+        outcome.duplicates.forEach { dup ->  // everyone already enrolled who matches
+            Log.w("enroll", "also matches ${dup.name} at ${dup.similarity}")
+        }
+        outcome.report                       // every engine call it made, and how long each took
+    }
+    is EnrollOutcome.Rejected -> toast(outcome.reason)   // no face, bad pose, no template…
+}
+```
+
+`duplicates` is the **full** list at or above the match threshold, highest first — one new face can match several existing people, and showing only the closest makes a gallery look cleaner than it is.
+
+#### 4. Identify against everyone enrolled (1:N)
+
+```kotlin
+when (val outcome = FaceGallery.get(context).identify(probe, limits, livenessOn = true)) {
+    is IdentifyOutcome.Done -> {
+        val result = outcome.result
+        for (face in result.faces) {                 // every face found in the probe
+            val best = face.best                     // Candidate: id, name, note, similarity
+            if (best != null && face.matched(result.threshold)) {
+                show("${best.name} at ${"%.2f".format(best.similarity)}")
+            } else {
+                show("No match")
+            }
+            face.matches(result.threshold)           // everyone at or above the threshold
+        }
+        result.extractMs; result.searchMs; result.gallerySize
+    }
+    is IdentifyOutcome.Rejected -> toast(outcome.reason)  // no face, liveness failed, no template
+}
+```
+
+With `livenessOn = true` a spoofed face is rejected **before** the gallery is searched, so a printout never reaches the matcher.
+
+#### 5. Read a single face, without the gallery
+
+```kotlin
+val faces = FaceDetector.detect(bitmap, FaceDetectionParam.allAttributes())
+val face = faces.firstOrNull() ?: return
+
+face.liveness; face.face_quality
+face.yaw; face.roll; face.pitch
+face.age; face.genderLabel; face.emotionLabel; face.maskLabel
+face.landmarkCount; face.landmarks_68
+
+val template = FaceDetector.template(bitmap, face)          // ByteArray, store it yourself
+val score = FaceDetector.similarity(templateA, templateB)   // 1:1
+```
+
+Use this path when you keep templates in **your** database instead of the kit's gallery.
+
+#### 6. Browse and maintain the gallery
+
+```kotlin
+val gallery = FaceGallery.get(context)
+gallery.count(query = "")                       // how many people match a search
+gallery.page(query = "mina", limit = 20, offset = 0)
+gallery.get(id)
+gallery.update(id, name = "Mina Ortiz", note = "Reception")
+gallery.delete(id)
+gallery.addListener { refreshList() }           // fires whenever the gallery changes
+```
+
+Enrolled people live in SQLite with their photos in app-private storage, and ids are never reused.
+
+#### 7. The capture coach (optional)
+
+`face-recognition-capture` gives you the oval guide, live coaching and a hold-to-capture that only fires on a good frame:
+
+```kotlin
+class AddPersonActivity : FaceCaptureActivity() {
+
+    override fun resultPanelLayout() = R.layout.view_enroll_panel
+
+    override fun limits() = myLimits
+
+    override fun onCaptureAnalyzed(face: FaceBox?, faceCount: Int) {
+        val photo = capturedPhoto() ?: return
+        // resultPanel() is your inflated layout; retakeCapture() returns to the camera
+    }
+}
+```
+
+#### 8. Show what actually happened
+
+`enroll`, `identify` and `attributes` all return a `CallReport` — useful in support tickets, and in your own logs:
+
+```kotlin
+report.success
+report.totalMs
+report.steps.forEach { step ->
+    Log.d("faceplugin", "${step.name} ${step.ms} ms ok=${step.ok} ${step.detail}")
+}
+```
+
+{% hint style="info" %}
+Call the kit from any background thread. Every engine call is serialized on one lock inside `FaceEngine`, so you do not have to coordinate threads yourself — but do not call it from the main thread, because the first `init` unpacks the on-device models.
+{% endhint %}
+
+### Engine API reference
+
+Below is the **raw engine** class the kit wraps, `com.faceplugin.facerecognitionsdk.FaceRecognitionSDK`. Use it only when you are replacing the kit — for example when you already have your own camera pipeline and person database.
+
 
 #### <mark style="color:orange;">setActivation:</mark> This API is used to activate the SDK <a href="#setactivation" id="setactivation"></a>
 
@@ -257,25 +439,29 @@ public static int deinit();
 1. Place `facerecognitionsdk.aar` in `libfacesdk/` (see Setup).
 2. Open the cloned repo in Android Studio.
 3. Run on a **physical** phone (emulator is not recommended for camera / liveness).
-4. Wait until the home status bar disappears. Then **Enroll / Identify / Capture / Attribute** unlock.
+4. Wait until the home status bar disappears. Then the Identify, People, Attribute and Liveness tabs unlock.
 
 Keep the demo package name **`com.faceplugin.facerecognitionsdk`** so the sample key works.
 
-| Demo tile     | What it does                                                                        |
-| ------------- | ----------------------------------------------------------------------------------- |
-| **Enroll**    | Enroll a person from a gallery photo (exactly one face) into the on-device database |
-| **Identify**  | Live 1:N camera match (stop on first hit) with 2D liveness                          |
-| **Capture**   | Oval coach capture → still with attributes → optional enroll                        |
-| **Attribute** | Gallery analysis: landmarks, liveness, pose, quality, age, gender, emotion          |
-| **Settings**  | Camera lens, identify / liveness / pose / eye-close thresholds                      |
-| **About**     | SDK name and license label                                                          |
+| Tab | What it does |
+| --- | ------------ |
+| **Identify** | Live 1:N against everyone enrolled, with passive 2D liveness, then a ranked result screen |
+| **People** | Enroll one person with the capture coach or many from photos; search, edit, delete |
+| **Attribute** | Every face in a photo: liveness, quality, detection score, pose, expression, age, gender, landmarks |
+| **Liveness** | Passive anti-spoofing check on the live camera feed |
+| **Settings** | Match, liveness and pose thresholds, and the license status |
 
 ### Screenshots
 
-| Home                                                                                                                                                                                                  | Identify                                                                                                                                                                                                   | Capture                                                                                                                                                                                                  |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/android/home.png" alt="Faceplugin Face Recognition Android home" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/android/identify.png" alt="Faceplugin Face Recognition live identify" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/android/capture.png" alt="Faceplugin Face Recognition oval capture" data-size="original"> |
+The demo is the same five-tab app on every platform.
 
+| Identify | People | Attribute |
+| -------- | ------ | --------- |
+| <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/identify.gif" alt="Faceplugin Face Recognition live 1:N identify with 2D liveness" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/people.gif" alt="Faceplugin Face Recognition enrolling people with the capture coach" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/attribute.gif" alt="Faceplugin Face Recognition face attributes, quality and landmarks" data-size="original"> |
+
+| Liveness | Settings |
+| -------- | -------- |
+| <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/liveness.gif" alt="Faceplugin passive 2D liveness check on the camera feed" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/settings.png" alt="Faceplugin Face Recognition match, liveness and pose thresholds" data-size="original"> |
 ### System requirements
 
 | Item    | Minimum                    | Recommended          |

@@ -51,7 +51,7 @@ Short definitions for terms used across Faceplugin docs. For product choice, see
 | **Machine code**         | Server fingerprint from `GET /api/machinecode` (or the API log). Send it when you request a server license. Docker and a native host on the same PC produce **different** codes. |
 | **Google Drive runtime** | Large native binaries (AAR, frameworks, `.so` / `.dll`, `.fpk`) linked from each platform page — not stored on GitHub.                                                           |
 | **Port 8082**            | ID Document Recognition HTTP API                                                                                                                                                 |
-| **Port 8083**            | Face Recognition HTTP API (combined Recognition + Liveness also uses 8083 and adds `/api/liveness`)                                                                              |
+| **Port 8092**            | Face Recognition HTTP API (detect, quality, template, 1:1 match, 1:N identify)                                                                              |
 | **Port 8084**            | Face Liveness HTTP API                                                                                                                                                           |
 | **Port 8086**            | ID Document Liveness HTTP API                                                                                                                                                    |
 

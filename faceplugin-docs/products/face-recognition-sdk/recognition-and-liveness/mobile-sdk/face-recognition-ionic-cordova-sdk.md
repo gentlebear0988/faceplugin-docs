@@ -33,7 +33,7 @@ Demo package name: **`com.faceplugin.facerecognitionsdk`**.
 
 ### Code <a href="#setup" id="setup"></a>
 
-{% embed url="https://github.com/Faceplugin-ltd/FaceRecognition-Ionic-Cordova" %}
+{% embed url="https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Ionic-Cordova" %}
 
 ### How to run
 
@@ -50,8 +50,8 @@ npm -v
 
 #### 2. Get the runtimes
 
-* Android AAR: [Google Drive](https://drive.google.com/drive/folders/1kpzYVv9Gbm_pEpDe9-x7FGB4NWZzvez0) → `Faceplugin/src/android/facerecognitionsdk.aar`
-* iOS frameworks: [Google Drive](https://drive.google.com/drive/folders/1PKmV-o7gq7s7dDtiNgXPfCi2ZlWaRy5H) → `Faceplugin/src/ios/Frameworks/`
+* Android AAR: [GitHub release](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Android/releases/tag/latest) → `Faceplugin/src/android/facerecognitionsdk.aar`
+* iOS frameworks: [GitHub release](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-iOS/releases/tag/latest) → `Faceplugin/src/ios/Frameworks/`
 
 ***
 
@@ -80,6 +80,53 @@ npm run ios
 ```
 
 Add `NSCameraUsageDescription` in `Info.plist`. Run on a **physical** iOS device.
+
+### Worked example
+
+A complete enrol-then-identify flow through the Cordova plugin. Store the templates wherever your app already keeps user data.
+
+```ts
+import {
+  getMachineCode, setActivation, init, getLicenseStatus,
+  faceDetection, templateExtraction, cropFace, similarity,
+  startVideoWorker, syncVideoWorkerDatabase, addVideoWorkerFrame, stopVideoWorker,
+  SDK_SUCCESS,
+} from 'face-recognition-cordova';
+
+// 1. Once, after deviceready.
+export async function boot(license: string) {
+  const machine = await getMachineCode();      // send this when you request a key
+  if (await setActivation(license) !== SDK_SUCCESS) throw new Error('activation failed');
+  if (await init() !== SDK_SUCCESS) throw new Error('init failed');
+  return getLicenseStatus();
+}
+
+// 2. Enrol one person from a photo.
+export async function enroll(uri: string, name: string) {
+  const faces = await faceDetection(uri);
+  if (faces.length !== 1) throw new Error('use a photo with exactly one face');
+
+  const template = await templateExtraction(uri, faces[0]);
+  const avatar = await cropFace(uri, faces[0]);
+  await store.save({ name, template, avatar });    // your storage
+}
+
+// 3. Live 1:N against everyone you stored.
+export async function startIdentify(people: Person[]) {
+  await startVideoWorker({ matchThreshold: 0.67 });
+  await syncVideoWorkerDatabase(people.map(p => p.template));
+  // feed camera frames with addVideoWorkerFrame(frame)
+  return () => stopVideoWorker();
+}
+
+// 4. Or compare two templates yourself, 1:1.
+const score = await similarity(templateA, templateB);
+const samePerson = score >= 0.67;
+```
+
+{% hint style="info" %}
+Call these after Cordova's `deviceready`, and keep one activation per app launch. The demo's `src/license.ts` shows how it picks the Android or iOS key at runtime.
+{% endhint %}
 
 ### APIs
 
@@ -122,6 +169,18 @@ similarity(feature1: string, feature2: string): Promise<number>
 ```
 
 Also: `getLicenseStatus`, `detect`, `extractFeature`, `quality`, VideoWorker (`startVideoWorker`, `ingestLiveCameraFrame`, `exportLastLiveFrame`), `deinit`.
+
+### Screenshots
+
+The demo is the same five-tab app on every platform.
+
+| Identify | People | Attribute |
+| -------- | ------ | --------- |
+| <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/identify.gif" alt="Faceplugin Face Recognition live 1:N identify with 2D liveness" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/people.gif" alt="Faceplugin Face Recognition enrolling people with the capture coach" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/attribute.gif" alt="Faceplugin Face Recognition face attributes, quality and landmarks" data-size="original"> |
+
+| Liveness | Settings |
+| -------- | -------- |
+| <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/liveness.gif" alt="Faceplugin passive 2D liveness check on the camera feed" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/settings.png" alt="Faceplugin Face Recognition match, liveness and pose thresholds" data-size="original"> |
 
 ### Integrate into your own app
 

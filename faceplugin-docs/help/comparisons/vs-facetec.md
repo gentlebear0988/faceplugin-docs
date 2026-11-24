@@ -9,7 +9,7 @@ icon: scale-balanced
 
 [FaceTec](https://www.facetec.com/) focuses on **3D liveness** (3D FaceMap / FaceScan), 3D face matching, and ID scan/OCR as part of that flow. Device SDKs target **iOS, Android, and webcams**. Customers run FaceTec **Server SDK** on their servers; FaceTec’s site describes **monthly 3D liveness usage** (minimum commitment) with ID scans included for customers. Certified PAD is a core FaceTec marketing claim.
 
-Faceplugin ships **2D** on-premise engines: still-image or camera-frame matching and **passive** anti-spoofing, plus standalone passport OCR and document liveness. Linux/Windows are **HTTP APIs** you host (ports 8083 / 8084 / 8082). License is an offline license key, not a per-liveness monthly meter in these docs.
+Faceplugin ships **2D** on-premise engines: still-image or camera-frame matching and **passive** anti-spoofing, plus standalone passport OCR and document liveness. Linux/Windows are **HTTP APIs** you host (ports 8092 / 8084 / 8082). License is an offline license key, not a per-liveness monthly meter in these docs.
 
 | Criterion                      | Faceplugin                                                                 | FaceTec                                                              |
 | ------------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------------------------- |

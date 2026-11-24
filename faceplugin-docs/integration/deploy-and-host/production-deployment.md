@@ -37,7 +37,7 @@ Use this checklist after a first-run install works. These are **how you run** th
 4. Point your load balancer or orchestrator at `GET /api/health`. No license is required for health.
 5. Put the APIs behind **your** reverse proxy. End TLS at nginx, Caddy, or your cloud load balancer. Open only the ports you need.
 6. Keep the APIs on your private network when you can. The Flask apps allow CORS from any origin (`*`). Do not treat CORS as security.
-7. Run **one container or process per product**. Prefer **combined** Face Recognition + Liveness (**8083**) and Document Reader with authenticity (**8082**) instead of separate liveness-only services. To scale, add more containers. Follow the license and machine-code rules on each platform page.
+7. Run **one container or process per product**. Run Face Recognition (**8092**) and, when you need server-side anti-spoofing, Face Liveness (**8084**) and Document Reader with authenticity (**8082**) instead of separate liveness-only services. To scale, add more containers. Follow the license and machine-code rules on each platform page.
 8. Read logs from `docker logs` or process stdout. Faceplugin does not collect cloud telemetry from these apps.
 
 ### License and machine code

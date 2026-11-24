@@ -33,7 +33,7 @@ Fully on-premise **Face Recognition SDK for Ionic Capacitor**. Package: `face-re
 
 ### Code <a href="#setup" id="setup"></a>
 
-{% embed url="https://github.com/Faceplugin-ltd/FaceRecognition-Ionic-Capacitor" %}
+{% embed url="https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Ionic-Capacitor" %}
 
 ### How to run
 
@@ -48,8 +48,8 @@ Node **18+**, JDK **17**, Android Studio and/or Xcode 15+. Physical phone with U
 #### Clone, install, build the plugin
 
 ```bash
-git clone https://github.com/Faceplugin-ltd/FaceRecognition-Ionic-Capacitor.git
-cd FaceRecognition-Ionic-Capacitor
+git clone https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Ionic-Capacitor.git
+cd FaceRecognition-LivenessDetection-Ionic-Capacitor
 npm install
 npm run build
 cd example && npm install
@@ -64,8 +64,8 @@ cd example && npm install
 | Android  | `facerecognitionsdk.aar` | `example/android/libfacesdk/` | `node_modules/face-recognition-capacitor/android/libs/`   |
 | iOS      | three frameworks         | `ios/Frameworks/`             | `node_modules/face-recognition-capacitor/ios/Frameworks/` |
 
-* Android Google Drive: [facerecognitionsdk.aar](https://drive.google.com/drive/folders/1kpzYVv9Gbm_pEpDe9-x7FGB4NWZzvez0)
-* iOS Google Drive: [frameworks](https://drive.google.com/drive/folders/1PKmV-o7gq7s7dDtiNgXPfCi2ZlWaRy5H) (`facerecognitionsdk`, `FaceRecognitionEngine`, `onnxruntime`)
+* Android GitHub release: [facerecognitionsdk.aar](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Android/releases/tag/latest)
+* iOS GitHub release: [frameworks](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-iOS/releases/tag/latest) (`facerecognitionsdk`, `FaceRecognitionEngine`, `onnxruntime`)
 {% endstep %}
 
 {% step %}
@@ -89,7 +89,19 @@ Keep demo ids so the included license works:
 | Android package name  | `com.faceplugin.facerecognitionsdk` |
 | iOS bundle identifier | `com.faceplugin.facerecognitionsdk` |
 
-Demo tiles: Enroll, Identify, Capture, Attribute, Settings, About.
+The demo app has five tabs: Identify, People, Attribute, Liveness and Settings.
+
+### Screenshots
+
+The demo is the same five-tab app on every platform.
+
+| Identify | People | Attribute |
+| -------- | ------ | --------- |
+| <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/identify.gif" alt="Faceplugin Face Recognition live 1:N identify with 2D liveness" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/people.gif" alt="Faceplugin Face Recognition enrolling people with the capture coach" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/attribute.gif" alt="Faceplugin Face Recognition face attributes, quality and landmarks" data-size="original"> |
+
+| Liveness | Settings |
+| -------- | -------- |
+| <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/liveness.gif" alt="Faceplugin passive 2D liveness check on the camera feed" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/settings.png" alt="Faceplugin Face Recognition match, liveness and pose thresholds" data-size="original"> |
 
 ### License
 
@@ -99,12 +111,22 @@ Default thresholds in Settings: identify **0.67**, liveness **0.5**, pose **40°
 
 ### Integrate into your own app
 
+Clone the repository next to your app, build the plugin once, and depend on that local copy. There is no npm package to install.
+
+```json
+{
+  "dependencies": {
+    "face-recognition-capacitor": "file:../FaceRecognition-LivenessDetection-Ionic-Capacitor"
+  }
+}
+```
+
 ```bash
-npm install git+https://github.com/Faceplugin-ltd/FaceRecognition-Ionic-Capacitor.git
+npm install
 npx cap sync
 ```
 
-Copy runtimes into `node_modules/face-recognition-capacitor/...` as in the table above. Set **your** `appId` in `capacitor.config.ts`. Add camera + photo-library permissions.
+Copy the runtimes into the plugin folder at `android/libs/` and `ios/Frameworks/` as in the table above, then run `npx cap sync` again. Set **your** `appId` in `capacitor.config.ts`. Add camera + photo-library permissions.
 
 ```ts
 import {
@@ -134,6 +156,61 @@ async function enrollStill(imageUri: string) {
   // Store template + crop in YOUR database
 }
 ```
+
+### Worked example
+
+The plugin exposes the raw calls **and** two session helpers that drive the camera for you. Start with the sessions; drop to the raw calls when you need your own pipeline.
+
+```ts
+import {
+  getMachineCode, setActivation, init, getLicenseStatus,
+  faceDetection, templateExtraction, cropFace, similarity,
+  IdentifySession, CaptureSession,
+  SDK_SUCCESS,
+} from 'face-recognition-capacitor';
+
+// 1. Once at start-up.
+export async function boot(license: string) {
+  const machine = await getMachineCode();      // send this when you request a key
+  if (await setActivation(license) !== SDK_SUCCESS) throw new Error('activation failed');
+  if (await init() !== SDK_SUCCESS) throw new Error('init failed');
+  return getLicenseStatus();
+}
+
+// 2. Enrol one person from a photo.
+export async function enroll(uri: string, name: string) {
+  const faces = await faceDetection(uri);
+  if (faces.length !== 1) throw new Error('use a photo with exactly one face');
+
+  const template = await templateExtraction(uri, faces[0]);
+  const avatar = await cropFace(uri, faces[0]);
+  await store.save({ name, template, avatar });    // your storage
+}
+
+// 3. Live 1:N with the session helper.
+export async function startIdentify(people: Person[]) {
+  const session = new IdentifySession({
+    settings: { frontCamera: true, matchThreshold: 0.67, livenessThreshold: 0.5 },
+    featureTemplates: people.map(p => p.template),
+    onTracking: (boxes, frame) => drawOverlay(boxes, frame, session.overlayMirror),
+    onMatch: (personIndex, score) => show(people[personIndex].name, score),
+  });
+
+  await session.start();
+  return () => session.stop();                 // and session.dispose() when you leave
+}
+
+// 4. Guided capture with the oval coach.
+const capture = new CaptureSession({ settings: { frontCamera: true } });
+await capture.start();
+const shot = await capture.captureNow(currentBoxes);   // CaptureResult | null
+await capture.stop();
+
+// 5. Or compare two templates yourself, 1:1.
+const score = await similarity(templateA, templateB);
+```
+
+`IdentifySession` mirrors the overlay for you through `session.overlayMirror`: the native front preview is mirrored on both platforms, the engine frames are not.
 
 ### APIs
 

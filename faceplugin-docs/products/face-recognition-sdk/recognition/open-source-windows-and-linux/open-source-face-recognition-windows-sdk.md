@@ -1,7 +1,7 @@
 ---
 description: >-
   Faceplugin open-source Face Recognition Windows SDK. Free on-premise Python
-  sample. Lower accuracy than the commercial HTTP API on port 8083.
+  sample. Lower accuracy than the commercial HTTP API on port 8092.
 icon: windows
 ---
 
@@ -60,7 +60,7 @@ No. It was tested on a Windows machine without a GPU.
 
 **Is it as accurate as the commercial face recognition API?**
 
-No. The open-source sample is less accurate. For the commercial engine, use the Face Recognition Windows SDK on port 8083.
+No. The open-source sample is less accurate. For the commercial engine, use the Face Recognition Windows SDK on port 8092.
 
 **What similarity threshold should I use?**
 

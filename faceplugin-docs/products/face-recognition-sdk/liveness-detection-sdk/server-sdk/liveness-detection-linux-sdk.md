@@ -11,7 +11,7 @@ Fully on-premise **Face Liveness HTTP API for Linux / Docker**. Image: `faceplug
 
 Score **one RGB JPEG**. Score **≥ 0.5** → Real / `pass` true. Score **< 0.5** → Spoof / `pass` false.
 
-Need recognition as well? Run [Face Recognition Linux SDK](../../recognition/server-sdk/face-recognition-linux-sdk.md) on port **8083** as a **second** container.
+Need recognition as well? Run [Face Recognition Linux SDK](../../recognition/server-sdk/face-recognition-linux-sdk.md) on port **8092** as a **second** container.
 
 All processing stays on your server. **No** biometric data is sent to Faceplugin cloud.
 
@@ -206,7 +206,7 @@ Passive. The API scores a single JPEG, with no challenge for the user.
 
 **Can I run face recognition and liveness on the same Linux server?**
 
-Yes. Run Face Recognition on port 8083 and Face Liveness on port 8084 as separate containers.
+Yes. Run Face Recognition on port 8092 and Face Liveness on port 8084 as separate containers.
 
 **Can I run several liveness containers with one license?**
 

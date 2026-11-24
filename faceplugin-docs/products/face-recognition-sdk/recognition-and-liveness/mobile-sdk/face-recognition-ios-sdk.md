@@ -10,20 +10,140 @@ icon: apple
 
 Fully on-premise **Face Recognition SDK for iOS**. Detect faces, extract templates, match 1:1 or live 1:N, and check passive 2D liveness on the device.
 
-Native class: `FaceRecognitionSDK` (`facerecognitionsdk.framework`). Status codes: **0** Success, **1** Invalid license, **2** Expired, **3** Not activated, **4** Init failed.
+You integrate through **`FaceRecognitionKit`**: `FaceEngine` for the lifecycle, `FaceGallery` for enrol and 1:N identify, `FaceDetector` for a single image, `FaceLimits` for the thresholds, and `CameraFrameUtils` for camera frames. `FaceRecognitionCapture` adds the guided capture screen. The demo app has five tabs — Identity, People, Attribute, Liveness and Settings — and is built on exactly these libraries.
+
+Status codes: **0** Success, **1** Invalid license, **2** Expired, **3** Not activated, **4** Init failed.
 
 ### Code <a href="#setup" id="setup"></a>
 
-{% embed url="https://github.com/Faceplugin-ltd/FaceRecognition-iOS" %}
+{% embed url="https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-iOS" %}
 
 ### Setup <a href="#setup" id="setup"></a>
 
-1. Unzip the frameworks from [Google Drive](https://drive.google.com/drive/folders/1PKmV-o7gq7s7dDtiNgXPfCi2ZlWaRy5H) next to the Xcode project: `facerecognitionsdk.framework`, `FaceRecognitionEngine.framework`, `onnxruntime.framework`.
-2. Add the SDK frameworks to the project in Xcode (**Embed & Sign**).
-3. Add `FaceRecognitionSDK-Bridging-Header.h` to Build Settings (`#import <facerecognitionsdk/FaceRecognitionSDK.h>`).
-4. Set **your** Signing Team. Demo bundle id: **`com.faceplugin.facerecognitionsdk.app`**. Physical iPhone, iOS 13+. Call **setActivation → initSDK** off the main thread.
+You integrate from the repository itself. There is no CocoaPods spec and no package-server dependency.
 
-### APIs
+1. Clone the repository. `Package.swift` resolves `facerecognitionsdk.xcframework` from the [GitHub release](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-iOS/releases/tag/latest), so a normal build needs no manual step. To build against an engine you already have on disk, put it at `Frameworks/facerecognitionsdk.xcframework` and set `FACEPLUGIN_LOCAL_ENGINE=1`.
+2. In Xcode: **File → Add Package Dependencies → Add Local...**, choose the cloned folder, and add **FaceRecognitionKit** (and **FaceRecognitionCapture** for the capture coach) to your app target.
+3. Add `NSCameraUsageDescription` and `NSPhotoLibraryUsageDescription` to `Info.plist`.
+4. Set **your** Signing Team. Demo bundle id: **`com.faceplugin.facerecognition.app`**. Physical iPhone, iOS 15+. Start the engine once at launch; the kit keeps every engine call on its own queue.
+
+### Quick start
+
+Everything below is the **kit** API — `FaceRecognitionKit`, the Swift package the demo app is built on. It owns the engine lifecycle, keeps every native call on one queue, and stores the enrolled people for you. The raw engine is underneath it, documented in [Engine API reference](#engine-api-reference).
+
+#### 1. Start the engine once at launch
+
+```swift
+import FaceRecognitionKit
+
+func application(_ application: UIApplication,
+                 didFinishLaunchingWithOptions options: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+    FaceEngine.shared.start(license: Secrets.facepluginLicense) { code in
+        // code == 0 when the engine is ready
+    }
+    return true
+}
+```
+
+Watch the state, and keep the camera disabled until it is ready:
+
+```swift
+FaceEngine.shared.addListener { state in
+    switch state {
+    case .ready:   enableCamera()
+    case .loading: showSpinner()
+    default:       showLicenseError(FaceEngine.shared.stateMessage(state))
+    }
+}
+
+FaceEngine.shared.isReady
+FaceEngine.shared.licenseStatus()   // what the key unlocks
+FaceEngine.shared.machineCode()     // send this when you request a key
+```
+
+#### 2. Set your thresholds once
+
+```swift
+let limits = FaceLimits(match: 0.80, liveness: 0.50, yaw: 20, roll: 20, pitch: 20)
+
+limits.isLive(face.liveness)
+limits.poseOk(face.yaw, face.roll, face.pitch)
+limits.matches(similarity)
+```
+
+`FaceLimits.default` is the engine's operating point. Pass one instance to enrol, identify and the capture screen so they cannot disagree.
+
+#### 3. Enrol a person
+
+```swift
+switch FaceGallery.shared.enroll(name: "Mina Ortiz", note: "Front desk", photo: photo, limits: limits) {
+case let .enrolled(record, report, duplicates):
+    person = record                       // id, name, note, photo
+    for dup in duplicates {               // everyone already enrolled who matches
+        print("also matches \(dup.name) at \(dup.similarity)")
+    }
+    log(report)                           // every engine call, and how long each took
+case let .rejected(reason, _):
+    toast(reason)                         // no face, bad pose, no template…
+}
+```
+
+`duplicates` is the **full** list at or above the match threshold, highest first, not just the closest.
+
+#### 4. Identify against everyone enrolled (1:N)
+
+```swift
+switch FaceGallery.shared.identify(probe, limits: limits, livenessOn: true) {
+case let .done(result):
+    for face in result.faces {
+        if let best = face.best, face.matched(result.threshold) {
+            show("\(best.name) at \(best.similarity)")
+        } else {
+            show("No match")
+        }
+    }
+    print(result.extractMs, result.searchMs, result.gallerySize)
+case let .rejected(reason, _):
+    toast(reason)                         // no face, liveness failed, no template
+}
+```
+
+With `livenessOn: true` a spoofed face is rejected **before** the gallery is searched.
+
+#### 5. Read a single face, without the gallery
+
+```swift
+let prepared = CameraFrameUtils.enginePreparedImage(image)   // upright, long side 1280
+let faces = FaceDetector.detect(prepared, param: .allAttributes())
+guard let face = faces.first else { return }
+
+face.liveness; face.faceQuality
+face.yaw; face.roll; face.pitch
+
+let template = FaceDetector.template(prepared, face: face)   // Data, store it yourself
+let score = FaceDetector.similarity(templateA, templateB)    // 1:1
+```
+
+Feed **upright, unmirrored** frames to the detector and mirror only the overlay. `CameraFrameUtils` has the helpers: `frame(from:frontCamera:connection:)` for a `CMSampleBuffer`, `liveEngineImage` at about 640 px for a live feed, and `enginePreparedImage` at 1280 px for a still.
+
+#### 6. What actually happened
+
+`enroll`, `identify` and `attributes` return a `CallReport`:
+
+```swift
+report.success
+report.totalMs
+for step in report.steps { print(step.name, step.ms, step.ok, step.detail) }
+```
+
+{% hint style="info" %}
+Call the kit from any thread: `SDKQueue` serializes every engine call for you. The first `start` unpacks the on-device models, so expect a few seconds before the state turns `.ready`.
+{% endhint %}
+
+### Engine API reference
+
+Below is the **raw engine**, `FaceRecognitionSDK` from `facerecognitionsdk.xcframework`, which the kit wraps. Use it only when you are replacing the kit with your own camera pipeline and person database.
+
 
 #### <mark style="color:orange;">setActivation:</mark> This API is used to activate the SDK <a href="#setactivation" id="setactivation"></a>
 
@@ -135,18 +255,21 @@ Native class: `FaceRecognitionSDK` (`facerecognitionsdk.framework`). Status code
 1. Place the three frameworks next to the Xcode project (see Setup).
 2. Keep demo bundle id **`com.faceplugin.facerecognitionsdk.app`**.
 3. Run on a **physical** iPhone (iOS 13+).
-4. Wait until the home status bar shows Ready. Then Enroll / Identify / Capture / Attribute unlock.
+4. Wait until the home status bar shows Ready. Then the Identity, People, Attribute and Liveness tabs unlock.
 
 Call **setActivation → initSDK** off the main thread. The engine is **not** concurrent.
 
 ### Screenshots
 
-The gallery is **Android** sample UI from `faceplugin-assets`. iOS demo tiles match these screens; there is no separate iOS photoshoot in these docs.
+The demo is the same five-tab app on every platform.
 
-| Home                                                                                                                                                                                                                                                               | Identify                                                                                                                                                                                                   | Capture                                                                                                                                                                                                  |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/android/home.png" alt="Faceplugin Face Recognition Android sample UI (shown on the iOS page; no separate iOS screenshot yet)" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/android/identify.png" alt="Faceplugin Face Recognition live identify" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/android/capture.png" alt="Faceplugin Face Recognition oval capture" data-size="original"> |
+| Identify | People | Attribute |
+| -------- | ------ | --------- |
+| <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/identify.gif" alt="Faceplugin Face Recognition live 1:N identify with 2D liveness" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/people.gif" alt="Faceplugin Face Recognition enrolling people with the capture coach" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/attribute.gif" alt="Faceplugin Face Recognition face attributes, quality and landmarks" data-size="original"> |
 
+| Liveness | Settings |
+| -------- | -------- |
+| <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/liveness.gif" alt="Faceplugin passive 2D liveness check on the camera feed" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/settings.png" alt="Faceplugin Face Recognition match, liveness and pose thresholds" data-size="original"> |
 ### License
 
 Licenses are **offline**. The sample key is only for the demo bundle. Request a new license key if you change the demo bundle.

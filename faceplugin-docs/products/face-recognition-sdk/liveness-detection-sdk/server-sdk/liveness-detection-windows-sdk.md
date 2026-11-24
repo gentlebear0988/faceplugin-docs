@@ -125,7 +125,7 @@ No. The Windows SDK runs natively with Python and `run.bat`.
 
 **Can I run face recognition and liveness on the same Windows server?**
 
-Yes. Run the Face Recognition Windows SDK on port 8083 and the Face Liveness Windows SDK on port 8084 as separate processes.
+Yes. Run the Face Recognition Windows SDK on port 8092 and the Face Liveness Windows SDK on port 8084 as separate processes.
 
 ### Related documentation
 

@@ -1,24 +1,22 @@
 ---
 description: >-
-  Faceplugin Face SDK — Recognition + Liveness. Mobile Identify with 2D
-  liveness, and server combined API on port 8083 with /api/liveness.
+  Faceplugin Face SDK — Recognition + Liveness. On-device enroll, 1:N Identify
+  and passive 2D liveness for Android, iOS, Flutter, React Native, .NET MAUI and
+  Ionic.
 icon: layer-group
 ---
 
 # Recognition + Liveness
 
-Products that ship **face recognition and liveness together**.
+**Face recognition and liveness together, on the device.** Enroll a person, run **1:N Identify** against everyone enrolled, and check **passive 2D liveness** in the same pass — all without a server.
 
-### Mobile
+This product is **mobile only**. See [Mobile SDK](mobile-sdk/) for Android, iOS, Flutter, React Native, .NET MAUI, Ionic Capacitor and Ionic Cordova.
 
-On-device enroll / **1:N Identify** with **passive 2D liveness** (same native engine as FaceRecognitionSDK Android / iOS). See [Mobile SDK](mobile-sdk/).
+### On the server
 
-### Server
+There is no combined recognition + liveness server product. Build the same pipeline from the two server products instead:
 
-One process on port **8083**: recognition routes **plus** `POST /api/liveness`. Image: `faceplugin/face-recognition-liveness-sdk`.
+* [Recognition](../recognition/) — Windows or Docker, for detect, quality, templates, 1:1 verification and 1:N identification.
+* [Liveness](../liveness-detection-sdk/) — Windows or Docker, for passive anti-spoofing, as its own service.
 
-See [Server](recognition-and-liveness-server/) for Linux, Windows, and .NET.
-
-**Capabilities:** [Face SDK capabilities](../capabilities.md).
-
-Prefer two separate server products? Run [Recognition](../recognition/) on **8083** and [Liveness](../liveness-detection-sdk/) on **8084**. For production eKYC, prefer this combined Face package — see [Deploy and host](../../../integration/deploy-and-host/architecture.md).
+**Capabilities:** [Face SDK capabilities](../capabilities.md) · **Deployment:** [Deploy and host](../../../integration/deploy-and-host/architecture.md).

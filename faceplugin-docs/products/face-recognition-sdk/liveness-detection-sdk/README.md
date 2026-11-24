@@ -1,8 +1,8 @@
 ---
 description: >-
   Faceplugin Face Liveness Detection SDK and anti-spoofing. On-premise passive
-  liveness for Android, iOS, Windows, and Linux Docker. POST /api/liveness on
-  port 8084.
+  liveness for Android, iOS, Windows and Docker, with 0% BPCER on phone and
+  server in internal ISO/IEC 30107-3 testing. POST /api/liveness on port 8084.
 icon: user-shield
 ---
 
@@ -14,7 +14,26 @@ icon: user-shield
 
 **What it can do:** [Face SDK capabilities](../capabilities.md) (Liveness section) — passive anti-spoofing, mobile vs server, and when to use it versus Face Recognition Identify.
 
-This product is **passive** anti-spoofing: no smile / turn-head challenge. These docs do **not** claim iBeta certification. Contact Faceplugin if you need a certification statement. Active challenge demos on GitHub are **not** this product. Optional active prompts on some Face Recognition Identify flows also are not this SDK.
+This product is **passive** anti-spoofing: no smile / turn-head challenge. Active challenge demos on GitHub are **not** this product, and the optional active prompts on some Face Recognition Identify flows are not this SDK either.
+
+### Evaluation results
+
+Internal PAD evaluation following **ISO/IEC 30107-3**, passive mode at the default threshold of **0.5**, against four presentation attack instrument (PAI) species: printed photo, screen replay (photo), screen replay (video), and a painted 3D resin mask.
+
+| Measure | Phone (on-device SDK) | Server (HTTP API) |
+| ------- | --------------------- | ----------------- |
+| **BPCER** — a real face rejected | **0%** | **0%** |
+| **APCER** — an attack accepted as a real face | **3.5–5.5%** | **0.5–1.5%** |
+
+Read the two rows together. At the default threshold the engine turned away **no genuine presentation** on either platform, and it paid for that on the attack side: roughly 1 attack in 18–29 got through on the phone, and 1 in 67–200 on the server.
+
+**Why the phone lets more through.** The server scores a finished image — chosen, full resolution, deliberately framed. The phone scores whatever the live camera produces, on hardware from an entry-level sensor to a flagship, in office light, daylight and low light. A dim, noisy or motion-blurred frame carries fewer of the cues that separate a print or a replayed screen from a real face. The capture stage, not the model, explains the gap.
+
+**Both rates follow the threshold.** Leave it at 0.5 when a refused genuine user is the expensive outcome. Raise it when an accepted attack is — and expect bona fide rejections to appear as APCER falls. On mobile you can often close the gap instead by raising the capture bar: better framing, a brighter prompt, a retry on a poor frame.
+
+{% hint style="info" %}
+This is an **internal FacePlugin QA evaluation**, not an independent laboratory result. These docs do **not** claim iBeta certification. A 0% BPCER means *no rejection was observed*, not that the rate is zero — for 600 presentations the one-sided 95% upper bound is about 0.5%. Ask Faceplugin for the full PAD evaluation report, or for a run at your own threshold on the devices you plan to ship.
+{% endhint %}
 
 This SDK is **standalone**. It does **not** enroll people or run 1:N. If you already use Face Recognition Identify on mobile, that flow already includes **passive 2D liveness**. Choose this product when you need anti-spoofing **without** face matching.
 
@@ -52,7 +71,7 @@ Start with [Face SDK capabilities](../capabilities.md), then **Mobile SDK** or *
 
 **What is passive liveness detection?**&#x20;
 
-The engine scores a camera frame or JPEG without a user challenge animation. See [Capabilities](https://github.com/gentlebear0988/temp-docs/tree/main/faceplugin-docs/liveness-detection-sdk/capabilities.md).
+The engine scores a camera frame or JPEG without a user challenge animation. See [Face SDK capabilities](../capabilities.md).
 
 **What is the difference between this and Face Recognition liveness?**
 

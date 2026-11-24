@@ -41,7 +41,7 @@ Process routes (`/api/detect`, `/api/liveness`, `/api/documentProcess`, and so o
 Check that the container or `run.bat` process is listening. **No license is required.**
 
 ```bash
-curl -s http://127.0.0.1:8083/api/health
+curl -s http://127.0.0.1:8092/api/health
 ```
 
 |                  |                                    |

@@ -1,8 +1,8 @@
 ---
 description: >-
-  Faceplugin Face SDK capabilities: face recognition (1:1, mobile 1:N Identify),
-  standalone face liveness (PAD), and combined Recognition + Liveness on port
-  8083.
+  Faceplugin Face SDK capabilities: face recognition (1:1 verification and 1:N
+  identification), standalone face liveness (PAD), and mobile Recognition +
+  Liveness.
 ---
 
 # Capabilities
@@ -11,9 +11,9 @@ What the Faceplugin **Face SDK** can do — **recognition**, **liveness**, and *
 
 | Mode                       | What you get                                            | Start install                                       |
 | -------------------------- | ------------------------------------------------------- | --------------------------------------------------- |
-| **Recognition**            | Detect, templates, 1:1 match, mobile 1:N Identify       | [Recognition](recognition/)                         |
+| **Recognition**            | Detect, quality, templates, 1:1 verification, 1:N identification | [Recognition](recognition/)                |
 | **Liveness**               | Standalone passive face anti-spoofing (no gallery)      | [Liveness](liveness-detection-sdk/)                 |
-| **Recognition + Liveness** | Matching and `POST /api/liveness` in one server process | [Recognition + Liveness](recognition-and-liveness/) |
+| **Recognition + Liveness** | Recognition and passive 2D liveness in one mobile SDK | [Recognition + Liveness](recognition-and-liveness/) |
 
 ```mermaid
 flowchart LR
@@ -33,15 +33,15 @@ The algorithm is evaluated on **NIST FRVT** (as stated across Faceplugin Face Re
 | Mode             | Where             | How                                                                                                 |
 | ---------------- | ----------------- | --------------------------------------------------------------------------------------------------- |
 | **1:1**          | Mobile and server | Extract two templates → `similarity` / `POST /api/similarity`, or `POST /api/match` with two images |
-| **1:N Identify** | Mobile demos      | VideoWorker + templates you store in **your** database (demo default match threshold **0.67**)      |
+| **1:N Identify** | Mobile and server | Mobile: VideoWorker over the templates you store. Server: `POST /api/v1/identify` over the local gallery (demo default match threshold **0.67**) |
 
-On **Linux / Windows**, the HTTP API is still-image **detect / quality / feature / match / similarity**. There is **no** server-side `POST /api/identify` gallery — you store templates and call similarity yourself.
+On **Windows / Docker**, the HTTP API covers still-image **detect / quality / feature / match / similarity**, plus a local gallery with **`POST /api/v1/identify`** and `/api/v1/persons`. You can still store templates yourself and call similarity instead.
 
 `templateExtraction` / `POST /api/feature` generates face templates that you can store in **your own database**. Faceplugin does not host your users' face data or provide a cloud-based person gallery.
 
 Mobile **1:N Identify** includes passive 2D liveness (default threshold **0.5**) as part of the identify flow. That is **not** the same as the standalone Liveness product below.
 
-#### Face Recognition REST API (Port 8083)
+#### Face Recognition REST API (Port 8092)
 
 | Route                  | Role          |
 | ---------------------- | ------------- |
@@ -52,12 +52,16 @@ Mobile **1:N Identify** includes passive 2D liveness (default threshold **0.5**)
 | `POST /api/feature`    | Template      |
 | `POST /api/match`      | Two images    |
 | `POST /api/similarity` | Two templates |
+| `POST /api/identify`   | 1:N gallery search |
+| `/api/persons`         | Enroll and manage people |
 
-Image: `faceplugin/face-recognition`. See [Linux](recognition/server-sdk/face-recognition-linux-sdk.md) · [Windows](recognition/server-sdk/face-recognition-windows-sdk.md).
+Routes also answer under `/api/v1`. Image: `faceplugin/face-recognition` (tags `latest` for **Lite** and `latest-plus` for **Plus**). See [Docker](recognition/server-sdk/face-recognition-linux-sdk.md) · [Windows](recognition/server-sdk/face-recognition-windows-sdk.md).
 
 ### Face Liveness Detection: Passive Anti-Spoofing (PAD)
 
-Standalone **passive** presentation-attack detection: scores a camera frame or JPEG **without** a smile / turn-head challenge. These docs do **not** claim iBeta certification. Contact Faceplugin if you need a certification statement.
+Standalone **passive** presentation-attack detection: scores a camera frame or JPEG **without** a smile / turn-head challenge.
+
+In internal testing following **ISO/IEC 30107-3** at the default threshold, **no genuine presentation was rejected on either platform** — **BPCER 0%** on the phone and on the server. Attacks accepted (**APCER**) were **3.5–5.5%** on the phone and **0.5–1.5%** on the server, across printed photos, screen replays (photo and video) and 3D masks: the phone scores live camera frames, while the server scores a finished image. Both rates move with the threshold. This is an internal FacePlugin QA evaluation; these docs do **not** claim iBeta certification. See [Liveness](liveness-detection-sdk/) for the trade-off and how to choose a threshold.
 
 Detects attack types including:
 
@@ -82,37 +86,28 @@ Score **≥ 0.5** → Real / pass (server default threshold in these docs).
 
 Images: `faceplugin/face-liveness`. See [Linux](liveness-detection-sdk/server-sdk/liveness-detection-linux-sdk.md) · [Windows](liveness-detection-sdk/server-sdk/liveness-detection-windows-sdk.md).
 
-### Face Recognition + Liveness in One Server
-
-Run face recognition and anti-spoofing together in **a single container on port 8083**. It includes every recognition endpoint plus `POST /api/liveness`, which makes it the simplest server setup for eKYC.
-
-* **Docker image:** `faceplugin/face-recognition-liveness-sdk`
-* **Setup guides:** Linux · Windows
-
-See [Linux](recognition-and-liveness/recognition-and-liveness-server/face-recognition-sdk-linux.md) · [Windows](recognition-and-liveness/recognition-and-liveness-server/face-recognition-sdk-windows.md).
-
 #### Which Face SDK Mode Should I Choose?
 
 | Need                                                      | Mode                                                              |
 | --------------------------------------------------------- | ----------------------------------------------------------------- |
 | Enroll / 1:N match (mobile Identify includes 2D liveness) | **Face Recognition**                                              |
 | Anti-spoofing only (no gallery)                           | **Face Liveness**                                                 |
-| Recognition + anti-spoofing in **one** server process     | **Face Recognition + Liveness**                                   |
+| Recognition + anti-spoofing on one device                 | **Face Recognition + Liveness** (mobile)                          |
 | Document authenticity (ID spoof)                          | [ID Document SDK](../id-document-recognition-sdk/capabilities.md) |
 
 ### Supported Platforms
 
 | Mode                   | Available as                                                                                                                                                                                                                                                                                                                                                  |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Recognition            | [Server SDK](recognition/server-sdk/)(`faceplugin/face-recognition`) · [Open Source](recognition/open-source-windows-and-linux/)                                                                                                                                                                                                                              |
+| Recognition            | [Server SDK](recognition/server-sdk/) (`faceplugin/face-recognition`, Lite and Plus) · [Open Source](recognition/open-source-windows-and-linux/)                                                                                                                                                                                                            |
 | Liveness               | [Mobile SDK](liveness-detection-sdk/mobile-sdk/) · [Server SDK](liveness-detection-sdk/server-sdk/) (**8084**)                                                                                                                                                                                                                                                |
-| Recognition + Liveness | [Mobile SDK](recognition-and-liveness/mobile-sdk/) · [Linux](recognition-and-liveness/recognition-and-liveness-server/face-recognition-sdk-linux.md) · [Windows](recognition-and-liveness/recognition-and-liveness-server/face-recognition-sdk-windows.md) · [.NET](recognition-and-liveness/recognition-and-liveness-server/face-recognition-dot-net-sdk.md) |
+| Recognition + Liveness | [Mobile SDK](recognition-and-liveness/mobile-sdk/) — Android, iOS, Flutter, React Native, .NET MAUI, Ionic Capacitor and Ionic Cordova. Mobile only. |
 
 ### Use cases
 
 * **Access control and time attendance:** enroll face templates and run live 1:N identification at doors, gates and terminals.
 * **eKYC selfie verification:** run passive anti-spoofing before, or together with, face matching.
-* **Server-side fraud checks:** still-image detection, matching and similarity on port 8083, plus liveness on port 8084 or on the combined 8083 service.
+* **Server-side fraud checks:** still-image detection, matching, similarity and 1:N identification on port 8092, plus liveness as its own service on port 8084.
 
 ### Frequently Asked Questions
 
@@ -122,7 +117,7 @@ Yes. After license activation, face detection and matching run entirely on your 
 
 **Is there a face recognition API?**
 
-Yes. The Face Recognition server exposes an HTTP REST API on port 8083, with endpoints for detection, quality, feature extraction, match and similarity.
+Yes. The Face Recognition server exposes an HTTP REST API on port 8092, with endpoints for detection, quality, feature extraction, match and similarity.
 
 **Is there a server-side 1:N face gallery?**
 

@@ -10,7 +10,7 @@ icon: face-viewfinder
 
 All processing runs on the device or on your own server, never in Faceplugin's cloud, so face data stays under your control.
 
-Faceplugin's face recognition algorithm (**faceplugin-000**) is independently tested by NIST in the [**FRTE 1:1 Verification**](https://pages.nist.gov/frvt/html/frvt11.html) benchmark (formerly FRVT). See the [NIST report card](https://face.nist.gov/frte/reportcards/11/faceplugin_000.html) and the results summary below. Server APIs run on **port 8083** (recognition) and **port 8084** (standalone liveness).
+Faceplugin's face recognition algorithm (**faceplugin-000**) is independently tested by NIST in the [**FRTE 1:1 Verification**](https://pages.nist.gov/frvt/html/frvt11.html) benchmark (formerly FRVT). See the [NIST report card](https://face.nist.gov/frte/reportcards/11/faceplugin_000.html) and the results summary below. Server APIs run on **port 8092** (recognition) and **port 8084** (standalone liveness).
 
 ### NIST FRTE 1:1 Face Recognition Accuracy
 
@@ -29,9 +29,9 @@ NIST does not endorse any product. Results apply to the algorithm version submit
 
 ### Three Ways to Use the Face SDK
 
-* [**Recognition**](recognition/) — recognition-only server API on **8083** (`faceplugin/face-recognition`).
+* [**Recognition**](recognition/) — recognition-only server API on **8092** (`faceplugin/face-recognition`).
 * [**Liveness**](liveness-detection-sdk/) — standalone face presentation attack detection (PAD) for mobile and for servers on port 8084, with no face matching.
-* [**Recognition + Liveness**](recognition-and-liveness/) — mobile Identify with 2D liveness, plus server face matching and `/api/liveness` on port 8083. **Recommended for eKYC**.
+* [**Recognition + Liveness**](recognition-and-liveness/) — mobile Identify with 2D liveness, plus server face matching and `/api/liveness` on port 8092. **Recommended for eKYC**.
 
 ```mermaid
 flowchart LR
@@ -58,7 +58,7 @@ flowchart LR
 
 ✅ Pose Estimation
 
-✅ On-premise Face Recognition API (port **8083**)
+✅ On-premise Face Recognition API (port **8092**)
 
 ### Choose a Face SDK Mode
 
@@ -92,7 +92,7 @@ Start with [Capabilities](capabilities.md), for an overview, then open the mode 
 * **Time and attendance:** enroll staff once, then match camera frames against your own database.
 * **Face login for apps:** 1:1 selfie match against a stored template with `similarity` or `POST /api/match`.
 * **eKYC selfie-to-ID match:** compare the portrait from an ID document with a live selfie, optionally together with the ID Document SDK and Face Liveness.
-* **Fraud detection:** run still-image detection, matching and similarity checks on your own server (port 8083).
+* **Fraud detection:** run still-image detection, matching and similarity checks on your own server (port 8092).
 
 ### Frequently Asked Questions
 
@@ -102,11 +102,11 @@ Yes. After you activate it with a license key, face matching works with no inter
 
 **Is face liveness detection included?**
 
-Mobile Identify includes passive 2D liveness. For standalone anti-spoofing, use the Face Liveness SDK. On the server, the combined Recognition + Liveness product provides both on port 8083.
+Mobile Identify includes passive 2D liveness. For standalone anti-spoofing, use the Face Liveness SDK. On the server, the combined Recognition + Liveness product provides both on port 8092.
 
 **Is there a face recognition API?**
 
-Yes. The face recognition API runs on port 8083 on Linux (Docker) and Windows. See the Recognition and Recognition + Liveness guides for setup.
+Yes. The face recognition API runs on port 8092 on Linux (Docker) and Windows. See the Recognition and Recognition + Liveness guides for setup.
 
 **Does the server support 1:N face identification?**
 

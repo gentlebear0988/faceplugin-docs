@@ -1,7 +1,7 @@
 ---
 description: >-
-  Faceplugin server architecture. Prefer Recognition + Liveness combined
-  packages for eKYC, HTTP vs sdk.py, and what you store in your own systems.
+  Faceplugin server architecture: one product per service, HTTP vs sdk.py, and
+  what you store in your own systems.
 icon: sitemap
 layout:
   width: default
@@ -31,16 +31,17 @@ Faceplugin ships product SDKs you combine in **your** mobile app or backend.
 
 Faceplugin does **not** ship one all-in-one identity-verification app.
 
-### Recommended: combined Recognition + Liveness
+### One product per service
 
-For production eKYC, prefer **combined** packages instead of running recognition and liveness as two separate Face (or Document) services:
+Face recognition and face liveness are **separate server products**. For face work on a server, run both and call them from your backend:
 
-| Need                                 | Prefer                                                                                                                                                | Avoid (unless you must split)                                                   |
-| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Face match + face PAD                | [Face Recognition + Liveness](../../products/face-recognition-sdk/recognition-and-liveness/) on **8083** (`faceplugin/face-recognition-liveness-sdk`) | Face Recognition **8083** + Face Liveness **8084** as two containers            |
-| Document OCR + document authenticity | [Document Reader](../../products/id-document-recognition-sdk/recognition-and-liveness/) on **8082** with a Liveness-capable license                   | Document Reader **8082** + Document Liveness **8086** when you already need OCR |
+| Need                                 | Run                                                                                                                                                    | Notes                                                                           |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| Face match + face PAD                | [Face Recognition](../../products/face-recognition-sdk/recognition/server-sdk/) on **8092** (`faceplugin/face-recognition`) **and** [Face Liveness](../../products/face-recognition-sdk/liveness-detection-sdk/server-sdk/) on **8084** | Two processes, each with its own runtime folder                                 |
+| Face match + face PAD on a phone     | [Face Recognition + Liveness Mobile](../../products/face-recognition-sdk/recognition-and-liveness/mobile-sdk/)                                         | One SDK, both on the device, no server at all                                   |
+| Document OCR + document authenticity | [Document Reader](../../products/id-document-recognition-sdk/recognition-and-liveness/) on **8082** with a Liveness-capable license                     | One product covers both                                                         |
 
-Use standalone [Face Liveness](../../products/face-recognition-sdk/liveness-detection-sdk/) (**8084**) or [ID Document Liveness](../../products/id-document-recognition-sdk/id-document-liveness-sdk/) (**8086**) only when you want **anti-spoofing without** matching or OCR.
+Use standalone [Face Liveness](../../products/face-recognition-sdk/liveness-detection-sdk/) (**8084**) or [ID Document Liveness](../../products/id-document-recognition-sdk/id-document-liveness-sdk/) (**8086**) when you want **anti-spoofing without** matching or OCR.
 
 ### Typical eKYC flow
 
@@ -57,7 +58,7 @@ flowchart LR
 | Step                                           | Recommended product                                                                                                        |
 | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | Read the ID + check it is real                 | [ID Document Recognition + Liveness](../../products/id-document-recognition-sdk/recognition-and-liveness/) (port **8082**) |
-| Check the selfie is live and match to ID photo | [Face Recognition + Liveness](../../products/face-recognition-sdk/recognition-and-liveness/) (port **8083**)               |
+| Check the selfie is live and match to ID photo | [Face Recognition + Liveness](../../products/face-recognition-sdk/recognition-and-liveness/) (port **8092**)               |
 
 You own the final pass / fail decision. The SDKs return scores and fields. They do not decide your business outcome.
 
@@ -73,12 +74,12 @@ flowchart TB
   end
   subgraph faceplugin [Faceplugin on your infra]
     Doc8082[Document Reader :8082]
-    Face8083[Face Recognition + Liveness :8083]
+    Face8092[Face Recognition :8092]
   end
   MobileApp --> Doc8082
-  MobileApp --> Face8083
+  MobileApp --> Face8092
   Backend --> Doc8082
-  Backend --> Face8083
+  Backend --> Face8092
 ```
 
 Optional authenticity-only Document Liveness (**8086**) or Face Liveness (**8084**) only if you intentionally split services.
@@ -87,19 +88,19 @@ Optional authenticity-only Document Liveness (**8086**) or Face Liveness (**8084
 
 Each product is its **own** process or container. Each has its own `lib/cpu/` (or Hub image that already includes the runtime).
 
-You do **not** install Document and Face into one App tree. To use both, run **two servers** (for example Document on **8082** and Face Recognition + Liveness on **8083**) and call both from your backend.
+You do **not** install Document and Face into one App tree. To use both, run **two servers** (for example Document on **8082** and Face Recognition on **8092**) and call both from your backend.
 
 ```
-document-reader/          face-recognition-liveness/
+document-reader/          face-recognition/
   lib/cpu/   ← Document     lib/cpu/   ← Face only
   app.py                    app.py
 ```
 
 {% hint style="danger" %}
-Do **not** dump a second product’s Google Drive folder into another product’s `lib/cpu/`. OpenCV, OpenSSL, and ONNX builds differ; files overwrite each other and the process can crash or return wrong scores. Keep one Drive runtime per App / container.
+Do **not** dump a second product’s runtime into another product’s `lib/cpu/`. OpenCV, OpenSSL, and ONNX builds differ; files overwrite each other and the process can crash or return wrong scores. Keep one release runtime per App / container.
 {% endhint %}
 
-The Face **Recognition + Liveness** package is already one product (one Drive / one image) with recognition and face PAD together. That is not the same as merging Document + Face into one folder.
+On mobile, **Recognition + Liveness** is one SDK that does both on the device. On a server there is no combined package: run Face Recognition and Face Liveness as two services, each with its own runtime folder.
 
 ### Who owns what
 

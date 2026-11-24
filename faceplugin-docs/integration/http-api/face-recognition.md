@@ -1,7 +1,7 @@
 ---
 description: >-
   Faceplugin Face Recognition HTTP API. POST /api/detect, /api/quality,
-  /api/feature, /api/match, and /api/similarity on port 8083. JSON or form-data.
+  /api/feature, /api/match, and /api/similarity on port 8092. JSON or form-data.
   CPU only.
 icon: face-viewfinder
 layout:
@@ -28,7 +28,7 @@ layout:
 
 # Face Recognition
 
-This is the **still-image** Face Recognition API. It runs on Linux Docker image `faceplugin/face-recognition` and on the Windows app. Default port **8083**. The engine is **CPU only**.
+This is the **still-image** Face Recognition API. It runs on Linux Docker image `faceplugin/face-recognition` and on the Windows app. Default port **8092**. The engine is **CPU only**.
 
 Shared routes (health, machine code, activate, license status): [Shared endpoints](shared.md).
 
@@ -36,16 +36,16 @@ Process POSTs return **engine JSON**. There is **no** `POST /api/identify` on th
 
 A call without a recognition license returns `code` 8 with `licenseError`.
 
-**Face Recognition + Liveness** packages expose the same Face Recognition routes **plus** [`POST /api/liveness`](face-liveness.md) on port **8083**.
+Face liveness is a separate service on port **8084** — see [`POST /api/liveness`](face-liveness.md).
 
 Install and run: [Face Recognition Linux SDK](../../products/face-recognition-sdk/recognition/server-sdk/face-recognition-linux-sdk.md) · [Face Recognition Windows SDK](../../products/face-recognition-sdk/recognition/server-sdk/face-recognition-windows-sdk.md).
 
 ### Try it
 
 ```bash
-curl -s http://127.0.0.1:8083/api/health
+curl -s http://127.0.0.1:8092/api/health
 IMG=$(base64 -w0 face.jpg)
-curl -s -X POST http://127.0.0.1:8083/api/detect \
+curl -s -X POST http://127.0.0.1:8092/api/detect \
   -H 'Content-Type: application/json' \
   -d "{\"image\":\"$IMG\"}"
 ```

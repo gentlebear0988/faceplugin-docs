@@ -36,7 +36,7 @@ It runs on Docker image `faceplugin/face-liveness` and on the Windows app. Defau
 
 Shared routes: [Shared endpoints](shared.md). A call without a liveness license returns `code` 8 with `licenseError`.
 
-The combined Face Recognition + Liveness packages also expose `/api/liveness` on port **8083**. See [Face Recognition HTTP API](face-recognition.md).
+Face Recognition runs as its own service on port **8092** and does not expose `/api/liveness`. See [Face Recognition HTTP API](face-recognition.md).
 
 Install and run: [Face Liveness Detection Linux SDK](../../products/face-recognition-sdk/liveness-detection-sdk/server-sdk/liveness-detection-linux-sdk.md) · [Face Liveness Detection Windows SDK](../../products/face-recognition-sdk/liveness-detection-sdk/server-sdk/liveness-detection-windows-sdk.md).
 

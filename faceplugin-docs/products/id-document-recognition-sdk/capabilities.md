@@ -101,7 +101,7 @@ Prefer authenticity **without** reading fields? Use dedicated Liveness on **8086
 
 1. Capture ID → Document Recognition (**8082** or mobile).
 2. Optional document authenticity (same engine or Document Liveness **8086**).
-3. Capture selfie → [Face SDK](../face-recognition-sdk/capabilities.md) liveness / match (**8084** / **8083** / mobile).
+3. Capture selfie → [Face SDK](../face-recognition-sdk/capabilities.md) liveness / match (**8084** / **8092** / mobile).
 4. Compare portrait crop to selfie with Face Recognition.
 
 See [Combining products](../../getting-started/choose-a-product.md#combining-products-ekyc).

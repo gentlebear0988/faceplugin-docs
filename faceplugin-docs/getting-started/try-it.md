@@ -18,17 +18,17 @@ There is no need to build a UI first: check that the server is running, activate
 | Server SDK              | Default port |
 | ----------------------- | ------------ |
 | ID Document Recognition | 8082         |
-| Face Recognition        | 8083         |
+| Face Recognition        | 8092         |
 | Face Liveness           | 8084         |
 | ID Document Liveness    | 8086         |
 
 ### 1. Check the Server and Get Your Machine Code (No License Needed)
 
-Before you have a license, you can confirm the server is running and get the **machine code** you need to request a license. Call the `health` and `machinecode` endpoints. The example below uses the Face Recognition server on port 8083; change the port for other products.
+Before you have a license, you can confirm the server is running and get the **machine code** you need to request a license. Call the `health` and `machinecode` endpoints. The example below uses the Face Recognition server on port 8092; change the port for other products.
 
 ```bash
-curl -s http://127.0.0.1:8083/api/health
-curl -s http://127.0.0.1:8083/api/machinecode
+curl -s http://127.0.0.1:8092/api/health
+curl -s http://127.0.0.1:8092/api/machinecode
 ```
 
 Send the machine code with your [license request](../help/request-a-license-and-support.md).
@@ -39,7 +39,7 @@ Save your license key to a file, then POST it to `/api/activate`. A successful c
 
 ```bash
 # license.txt contains one line: license key
-curl -s -X POST http://127.0.0.1:8083/api/activate \
+curl -s -X POST http://127.0.0.1:8092/api/activate \
   -H 'Content-Type: text/plain' \
   --data-binary @license.txt
 ```
@@ -51,16 +51,16 @@ curl -s -X POST http://127.0.0.1:8083/api/activate \
 ```bash
 IMG=$(base64 -w0 face.jpg)   # macOS: base64 -i face.jpg
 
-curl -s -X POST http://127.0.0.1:8083/api/detect \
+curl -s -X POST http://127.0.0.1:8092/api/detect \
   -H 'Content-Type: application/json' \
   -d "{\"image\":\"$IMG\"}"
 
-curl -s -X POST http://127.0.0.1:8083/api/match \
+curl -s -X POST http://127.0.0.1:8092/api/match \
   -H 'Content-Type: application/json' \
   -d "{\"image1\":\"$IMG\",\"image2\":\"$IMG\"}"
 ```
 
-Install: [Face Recognition Linux SDK](../products/face-recognition-sdk/recognition/server-sdk/face-recognition-linux-sdk.md). Combined recognition + liveness in one package: [Face Recognition + Liveness Linux](../products/face-recognition-sdk/recognition-and-liveness/recognition-and-liveness-server/face-recognition-sdk-linux.md) (same port, adds `/api/liveness`).
+Install: [Face Recognition Docker SDK](../products/face-recognition-sdk/recognition/server-sdk/face-recognition-linux-sdk.md) or [Windows](../products/face-recognition-sdk/recognition/server-sdk/face-recognition-windows-sdk.md). For anti-spoofing on the server, add [Face Liveness](../products/face-recognition-sdk/liveness-detection-sdk/server-sdk/) on port **8084**; on a phone, [Recognition + Liveness Mobile](../products/face-recognition-sdk/recognition-and-liveness/mobile-sdk/) does both on the device.
 {% endtab %}
 
 {% tab title="Face Liveness" %}
@@ -72,7 +72,7 @@ curl -s -X POST http://127.0.0.1:8084/api/liveness \
   -d "{\"image\":\"$IMG\"}"
 ```
 
-Score **≥ 0.5** is Real / pass. JPEG only. [Face Liveness Detection Linux SDK](../products/face-recognition-sdk/liveness-detection-sdk/server-sdk/liveness-detection-linux-sdk.md). Combined package on **8083**: same body against `/api/liveness` on [Recognition + Liveness Linux](../products/face-recognition-sdk/recognition-and-liveness/recognition-and-liveness-server/face-recognition-sdk-linux.md).
+Score **≥ 0.5** is Real / pass. JPEG only. [Face Liveness Detection Linux SDK](../products/face-recognition-sdk/liveness-detection-sdk/server-sdk/liveness-detection-linux-sdk.md). Face Liveness runs as its own service on **8084**, beside Face Recognition on **8092**.
 {% endtab %}
 
 {% tab title="ID Document" %}
@@ -94,7 +94,7 @@ Windows: use Git Bash or WSL for `base64`, or Python:
 import base64, json, urllib.request
 img = base64.b64encode(open("face.jpg", "rb").read()).decode()
 req = urllib.request.Request(
-    "http://127.0.0.1:8083/api/detect",
+    "http://127.0.0.1:8092/api/detect",
     data=json.dumps({"image": img}).encode(),
     headers={"Content-Type": "application/json"},
 )
@@ -180,7 +180,7 @@ On the Face Liveness API, a score of 0.5 or higher means the face is real.
 
 **Which ports do the Faceplugin server APIs use?**
 
-ID Document Recognition uses 8082, Face Recognition 8083, Face Liveness 8084 and ID Document Liveness 8086.
+ID Document Recognition uses 8082, Face Recognition 8092, Face Liveness 8084 and ID Document Liveness 8086.
 
 ### Related documentation
 

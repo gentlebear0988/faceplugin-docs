@@ -33,7 +33,7 @@ All processing stays on the device. **No** biometric data is sent to Faceplugin 
 
 ### Code <a href="#setup" id="setup"></a>
 
-{% embed url="https://github.com/Faceplugin-ltd/FaceRecognition-Flutter" %}
+{% embed url="https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Flutter" %}
 
 ### How to Run
 
@@ -48,8 +48,8 @@ Flutter **3.44+** and Dart **3.3+** (from the package `pubspec.yaml`), JDK **17+
 #### Clone and bootstrap
 
 ```bash
-git clone https://github.com/Faceplugin-ltd/FaceRecognition-Flutter.git
-cd FaceRecognition-Flutter
+git clone https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Flutter.git
+cd FaceRecognition-LivenessDetection-Flutter
 dart run tool/bootstrap.dart
 ```
 {% endstep %}
@@ -62,8 +62,8 @@ dart run tool/bootstrap.dart
 | Android  | `facerecognitionsdk.aar` | `example/android/libfacesdk/` | Copy `example/android/libfacesdk/` into **your app** `android/libfacesdk/` and `include(":libfacesdk")` |
 | iOS      | three frameworks         | `ios/Frameworks/`             | Plugin checkout `ios/Frameworks/`                                                                       |
 
-* Android Google Drive: [facerecognitionsdk.aar](https://drive.google.com/drive/folders/1kpzYVv9Gbm_pEpDe9-x7FGB4NWZzvez0)
-* iOS Google Drive: [frameworks](https://drive.google.com/drive/folders/1PKmV-o7gq7s7dDtiNgXPfCi2ZlWaRy5H) (`facerecognitionsdk`, `FaceRecognitionEngine`, `onnxruntime`)
+* Android GitHub release: [facerecognitionsdk.aar](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Android/releases/tag/latest)
+* iOS GitHub release: [frameworks](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-iOS/releases/tag/latest) (`facerecognitionsdk`, `FaceRecognitionEngine`, `onnxruntime`)
 
 {% hint style="warning" %}
 Do **not** `implementation(files(…aar))` inside the plugin — AGP will fail `bundleDebugAar`. Copy the `libfacesdk` **module** from the example into your app.
@@ -97,16 +97,19 @@ Keep demo ids so the included license works:
 | Android     | minSdk 24, physical device recommended |
 | iOS         | iOS 13+, physical device recommended   |
 
-Demo tiles: Enroll, Identify, Capture, Attribute, Settings, About.
+The demo app has five tabs: Identify, People, Attribute, Liveness and Settings.
 
 ### Screenshots
 
-The gallery is **Android** sample UI from `faceplugin-assets`. The Flutter plugin wraps the same native engines; there is no separate Flutter photoshoot in these docs.
+The demo is the same five-tab app on every platform.
 
-| Home                                                                                                                                                                                                                                                                       | Identify                                                                                                                                                                                                   | Capture                                                                                                                                                                                                  |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/android/home.png" alt="Faceplugin Face Recognition Android sample UI (shown on the Flutter page; no separate Flutter screenshot yet)" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/android/identify.png" alt="Faceplugin Face Recognition live identify" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/android/capture.png" alt="Faceplugin Face Recognition oval capture" data-size="original"> |
+| Identify | People | Attribute |
+| -------- | ------ | --------- |
+| <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/identify.gif" alt="Faceplugin Face Recognition live 1:N identify with 2D liveness" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/people.gif" alt="Faceplugin Face Recognition enrolling people with the capture coach" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/attribute.gif" alt="Faceplugin Face Recognition face attributes, quality and landmarks" data-size="original"> |
 
+| Liveness | Settings |
+| -------- | -------- |
+| <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/liveness.gif" alt="Faceplugin passive 2D liveness check on the camera feed" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/settings.png" alt="Faceplugin Face Recognition match, liveness and pose thresholds" data-size="original"> |
 ### License
 
 Licenses are **offline**. Demo keys live in `example/lib/core/constants/license.dart`. Request a new license key for your own app.
@@ -119,11 +122,12 @@ Default thresholds in the example Settings: identify **0.67**, liveness **0.5**,
 
 You need the Flutter plugin + native runtimes. You do **not** need the example UI or person database.
 
+Clone the repository next to your app and depend on that local copy. There is no pub.dev package.
+
 ```yaml
 dependencies:
   face_recognition_sdk:
-    git:
-      url: https://github.com/Faceplugin-ltd/FaceRecognition-Flutter.git
+    path: ../FaceRecognition-LivenessDetection-Flutter
 ```
 
 Then copy runtimes (table above), set your Android package name / iOS bundle identifier, add camera + photo-library permissions, and request a license for your own app.
@@ -153,6 +157,56 @@ Future<void> enrollStill(String imagePath) async {
 ```
 
 Optional oval UI: `FaceCapture` from `package:face_recognition_sdk/capture`.
+
+### Worked example
+
+A complete enrol-then-identify flow. Store the templates wherever your app already keeps user data — the plugin does not own a gallery.
+
+```dart
+import 'package:face_recognition_sdk/face_recognition_sdk.dart';
+
+// 1. Once at start-up.
+Future<String> boot(String license) async {
+  final machine = await getMachineCode();        // send this when you request a key
+  final act = await setActivation(license);
+  if (act != sdkSuccess) throw StateError(await lastLicenseError());
+  final code = await init();
+  if (code != sdkSuccess) throw StateError('init failed: $code');
+  return getLicenseStatus();                     // what the key unlocks
+}
+
+// 2. Enrol one person from a gallery photo.
+Future<void> enroll(String imagePath, String name) async {
+  final faces = await faceDetection(imagePath);
+  if (faces.length != 1) throw StateError('use a photo with exactly one face');
+
+  final face = faces.first;
+  if (face.liveness < 0.5) throw StateError('that photo looks like a spoof');
+
+  final template = await templateExtraction(imagePath, face);
+  final avatar = await cropFace(imagePath, face);
+  await db.savePerson(name: name, template: template, avatar: avatar);  // your storage
+}
+
+// 3. Identify on the live camera, 1:N against everyone you stored.
+Future<void> startIdentify(void Function(String, double) onMatch) async {
+  final people = await db.allPeople();
+  await startVideoWorker(const VideoWorkerConfig(matchThreshold: 0.67));
+  await syncVideoWorkerDatabase([for (final p in people) p.template], 0.67);
+
+  // feed camera frames:
+  // final result = await applyLiveFrame(bytes, rotateDegrees: 90, maxEdge: 640, feedWorker: true);
+}
+
+// 4. Or compare two templates yourself, 1:1.
+final score = await similarity(templateA, templateB);
+final samePerson = score >= 0.67;
+
+// 5. Always release the engine when the screen goes away.
+await stopVideoWorker();
+```
+
+Thresholds are arguments, not settings the plugin reads: identify **0.67**, liveness **0.5**, pose **40°**, eye-close **0.5** are the example's defaults.
 
 ### APIs
 
@@ -226,7 +280,7 @@ Future<void> stopVideoWorker()
 
 **What is the Flutter face recognition package name?**
 
-`face_recognition_sdk`, added as a git dependency from the FaceRecognition-Flutter repository.
+`face_recognition_sdk`, added as a git dependency from the FaceRecognition-LivenessDetection-Flutter repository.
 
 **Does the Flutter face recognition SDK work offline?**
 

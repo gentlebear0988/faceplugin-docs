@@ -37,9 +37,7 @@ All shipping server products are **CPU only**. There is no `lib/gpu/` package in
 
 | Product                            | API port | Gradio (host only) | Docker image                               | Role                                             |
 | ---------------------------------- | -------: | -----------------: | ------------------------------------------ | ------------------------------------------------ |
-| ID Document Recognition + Liveness |     8082 |               9002 | `faceplugin/document-reader`               | **Recommended** for OCR + authenticity           |
-| Face Recognition + Liveness        |     8083 |               9003 | `faceplugin/face-recognition-liveness-sdk` | **Recommended** for match + face PAD             |
-| Face Recognition (only)            |     8083 |               9003 | `faceplugin/face-recognition`              | Match only — no `/api/liveness`                  |
+| ID Document Recognition + Liveness |     8082 |               9002 | `faceplugin/document-reader`               | **Recommended** for OCR + authenticity           || Face Recognition (only)            |     8092 |               9092 | `faceplugin/face-recognition`              | Match only — no `/api/liveness`                  |
 | Face Liveness (only)               |     8084 |               9004 | `faceplugin/face-liveness`                 | PAD only — use when you do not need match        |
 | ID Document Liveness (only)        |     8086 |               9006 | `faceplugin/document-liveness`             | Authenticity only — use when you do not need OCR |
 
@@ -50,14 +48,12 @@ Prefer the **combined** Face and Document images for eKYC so you do not run sepa
 ### Per-product sizing
 
 | Product                            | Min CPU                                    | Min RAM | Min disk | Recommended                    | OS notes                                                                                                       | Docker extras                                                                         |
-| ---------------------------------- | ------------------------------------------ | ------- | -------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Face Recognition + Liveness        | 2 cores                                    | 4 GB    | 4 GB     | 4 cores / 8 GB RAM / 8 GB disk | Docker: Ubuntu 22.04 / 24.04. Native Linux needs glibc **2.38+** (for example Ubuntu 24.04). Windows 10/11 x64 | `--shm-size=2gb --privileged`. On Linux mount `/etc/machine-id:ro`                    |
-| Face Recognition (only)            | 2 cores                                    | 4 GB    | 4 GB     | 4 cores / 8 GB RAM / 8 GB disk | Same as combined                                                                                               | `--shm-size=2gb --privileged`. On Linux mount `/etc/machine-id:ro`                    |
+| ---------------------------------- | ------------------------------------------ | ------- | -------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- || Face Recognition (only)            | 2 cores                                    | 4 GB    | 4 GB     | 4 cores / 8 GB RAM / 8 GB disk | Same as combined                                                                                               | `--shm-size=2gb --privileged`. On Linux mount `/etc/machine-id:ro`                    |
 | Face Liveness (only)               | 2 cores (Linux) / 4 cores (Windows README) | 4 GB    | 4 GB     | 4 cores / 8 GB RAM / 8 GB disk | Same Docker OS guidance as Face Recognition. Windows 10/11 x64                                                 | `--shm-size=1gb --privileged`. On Linux mount `/etc/machine-id:ro`                    |
 | ID Document Recognition + Liveness | 2 cores                                    | 4 GB    | 4 GB     | 4 cores / 8 GB RAM / 8 GB disk | Ubuntu 20.04+ x86\_64; recommend 22.04 / 24.04. Windows 10/11 x64. CPU only                                    | `--shm-size=2gb` is **required**. `--privileged`. On Linux mount `/etc/machine-id:ro` |
 | ID Document Liveness (only)        | 2 cores                                    | 4 GB    | 4 GB     | 4 cores / 8 GB RAM / 8 GB disk | Align with Document Reader Linux                                                                               | `--shm-size=2gb` is **required**. `--privileged`. On Linux mount `/etc/machine-id:ro` |
 
-For a typical eKYC box, plan **two** containers: Document Reader (**8082**) + Face Recognition + Liveness (**8083**). Add RAM/CPU for each. Each container keeps its own `lib/cpu/` — do not mix product Drive folders. See [Architecture](architecture.md).
+For a typical eKYC box, plan **two** containers: Document Reader (**8082**) + Face Recognition + Liveness (**8092**). Add RAM/CPU for each. Each container keeps its own `lib/cpu/` — do not mix product Drive folders. See [Architecture](architecture.md).
 
 ### Docker rules
 

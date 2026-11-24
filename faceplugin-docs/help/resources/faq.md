@@ -22,7 +22,7 @@ A library that detects faces, extracts a template (embedding), and compares temp
 
 ### Is there a Face Recognition API?
 
-Yes. Linux Docker and Windows expose an HTTP API on port **8083** (`/api/detect`, `/api/match`, `/api/similarity`). The combined Recognition + Liveness packages also expose `/api/liveness` on the same port. Full reference: [Face Recognition HTTP API](../../integration/http-api/face-recognition.md). Overview: [HTTP API](../../integration/http-api/).
+Yes. Linux Docker and Windows expose an HTTP API on port **8092** (`/api/detect`, `/api/match`, `/api/similarity`). The separate Face Liveness service packages also expose `/api/liveness` on the same port. Full reference: [Face Recognition HTTP API](../../integration/http-api/face-recognition.md). Overview: [HTTP API](../../integration/http-api/).
 
 ### What is passive liveness detection?
 

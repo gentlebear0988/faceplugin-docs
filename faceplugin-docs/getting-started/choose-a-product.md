@@ -21,7 +21,7 @@ Need a vendor comparison? See [SDK comparison](../help/comparisons/).
 | Passport OCR / MRZ / ID card verification     | [ID Document capabilities](../products/id-document-recognition-sdk/capabilities.md) → [ID Document SDK](../products/id-document-recognition-sdk/) · [Recognition](../products/id-document-recognition-sdk/recognition.md)                                                                                                                                                                                                                                                           |
 | Match faces 1:1 or 1:N / Face Recognition API | [Face SDK capabilities](../products/face-recognition-sdk/capabilities.md) → [Face SDK](../products/face-recognition-sdk/) · [Recognition](../products/face-recognition-sdk/recognition/)                                                                                                                                                                                                                                                                                            |
 | Face anti-spoofing only                       | [Face SDK capabilities](../products/face-recognition-sdk/capabilities.md) → [Liveness](../products/face-recognition-sdk/liveness-detection-sdk/)                                                                                                                                                                                                                                                                                                                                    |
-| Recognition and anti-spoofing together        | For recognition plus liveness on one server, use [Face Recognition + Liveness Linux](../products/face-recognition-sdk/recognition-and-liveness/recognition-and-liveness-server/face-recognition-sdk-linux.md) or [Windows](../products/face-recognition-sdk/recognition-and-liveness/recognition-and-liveness-server/face-recognition-sdk-windows.md) (port **8083**, includes `/api/liveness`). Or run separate services on **8083** and **8084**—never mix their runtime folders. |
+| Recognition and anti-spoofing together        | On a phone, use [Face Recognition + Liveness Mobile](../products/face-recognition-sdk/recognition-and-liveness/mobile-sdk/), which does both on the device. On a server, run [Face Recognition](../products/face-recognition-sdk/recognition/server-sdk/) on **8092** and [Face Liveness](../products/face-recognition-sdk/liveness-detection-sdk/server-sdk/) on **8084** as two services—never mix their runtime folders. |
 | Document authenticity **without** OCR         | [ID Document Liveness SDK](../products/id-document-recognition-sdk/id-document-liveness-sdk/)                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ### ID Document Recognition SDK: Passport, ID Card and Driver's License OCR
@@ -60,16 +60,15 @@ Capability overview: [Face SDK capabilities](../products/face-recognition-sdk/ca
 
 | Platform                                | Clone                                                                                                                  | Package / image                             | Port                                            |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------- |
-| Android                                 | [FaceRecognition-Android](https://github.com/Faceplugin-ltd/FaceRecognition-Android)                                   | `facerecognitionsdk.aar`                    | —                                               |
-| iOS                                     | [FaceRecognition-iOS](https://github.com/Faceplugin-ltd/FaceRecognition-iOS)                                           | `facerecognitionsdk` + engine + onnxruntime | —                                               |
-| Flutter                                 | [FaceRecognition-Flutter](https://github.com/Faceplugin-ltd/FaceRecognition-Flutter)                                   | `face_recognition_sdk`                      | —                                               |
-| React Native                            | [FaceRecognition-React-Native](https://github.com/Faceplugin-ltd/FaceRecognition-React-Native)                         | `face-recognition-sdk`                      | —                                               |
-| Ionic Capacitor                         | [FaceRecognition-Ionic-Capacitor](https://github.com/Faceplugin-ltd/FaceRecognition-Ionic-Capacitor)                   | `face-recognition-capacitor`                | —                                               |
-| Ionic Cordova                           | [FaceRecognition-Ionic-Cordova](https://github.com/Faceplugin-ltd/FaceRecognition-Ionic-Cordova)                       | Cordova plugin                              | —                                               |
-| Windows (recognition)                   | [FaceRecognition-Windows](https://github.com/Faceplugin-ltd/FaceRecognition-Windows)                                   | `sdk.py` + `app.py`                         | API **8083**, demo **9003**                     |
-| Linux / Docker (recognition)            | [FaceRecognition-Docker](https://github.com/Faceplugin-ltd/FaceRecognition-Docker)                                     | `faceplugin/face-recognition`               | API **8083**, demo **9003**                     |
-| Windows (recognition + liveness)        | [FaceRecognitionSDK-Windows](https://github.com/Faceplugin-ltd/FaceRecognitionSDK-Windows)                             | `sdk.py` + `app.py`                         | API **8083** (+ `/api/liveness`), demo **9003** |
-| Linux / Docker (recognition + liveness) | [FaceRecognition-LivenessDetection-Docker](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Docker) | `faceplugin/face-recognition-liveness-sdk`  | API **8083** (+ `/api/liveness`), demo **9003** |
+| Android                                 | [FaceRecognition-LivenessDetection-Android](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Android)                                   | `facerecognitionsdk.aar`                    | —                                               |
+| iOS                                     | [FaceRecognition-LivenessDetection-iOS](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-iOS)                                           | `facerecognitionsdk` + engine + onnxruntime | —                                               |
+| Flutter                                 | [FaceRecognition-LivenessDetection-Flutter](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Flutter)                                   | `face_recognition_sdk`                      | —                                               |
+| React Native                            | [FaceRecognition-LivenessDetection-ReactNative](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-ReactNative)                         | `face-recognition-sdk`                      | —                                               |
+| Ionic Capacitor                         | [FaceRecognition-LivenessDetection-Ionic-Capacitor](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Ionic-Capacitor)                   | `face-recognition-capacitor`                | —                                               |
+| Ionic Cordova                           | [FaceRecognition-LivenessDetection-Ionic-Cordova](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Ionic-Cordova)                       | Cordova plugin                              | —                                               |
+| .NET MAUI                               | [FaceRecognition-LivenessDetection-DotNet-MAUI](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-DotNet-MAUI) | `FaceSdk` (C#)                     | —                                               |
+| Windows (recognition)                   | [FaceRecognition-Windows](https://github.com/Faceplugin-ltd/FaceRecognition-Windows)                                   | `sdk.py` + `app.py`                         | API **8092**, demo **9092**                     |
+| Docker (recognition)                    | [FaceRecognition-Docker](https://github.com/Faceplugin-ltd/FaceRecognition-Docker)                                     | `faceplugin/face-recognition` (`latest`, `latest-plus`) | API **8092**, demo **9092**         |
 
 ### Face Liveness Detection SDK: Anti-Spoofing
 
@@ -107,7 +106,7 @@ The **ID Document Liveness SDK** checks **document authenticity and detects docu
 
 Best practices for an on-premise eKYC deployment:
 
-* **Run one process or container per product.** For example, run the ID Document service on port **8082** and Face Recognition + Liveness on port **8083**.
+* **Run one process or container per product.** For example, run the ID Document service on port **8082**, Face Recognition on **8092**, and Face Liveness on **8084**.
 * **Keep products separate.** Do not copy one product's runtime files into another product's `lib/cpu/` folder. Run each on its own server or container instead.
 * **Plan your architecture:** see  [Architecture](../integration/deploy-and-host/architecture.md) for topology and which component handles what.
 * **Size your servers:** see [Hosting requirements](../integration/deploy-and-host/hosting-requirements.md) for hardware sizing and Docker flags.
@@ -120,7 +119,7 @@ Use the ID Document Recognition SDK. It reads passports, national ID cards and d
 
 **Can I run face recognition and face liveness detection in one server?**
 
-Yes. The Face Recognition + Liveness products for Windows and Linux/Docker run both on port 8083, with liveness available at `/api/liveness`. You can also run them as two separate services on ports 8083 and 8084.
+On a phone, yes: the Recognition + Liveness mobile SDK does both on the device. On a server, run Face Recognition on **8092** and Face Liveness on **8084** as two services. You can also run them as two separate services on ports 8092 and 8084.
 
 **Does the Face Recognition server API support 1:N identification?**
 
@@ -132,7 +131,7 @@ No. Faceplugin provides the building blocks: you combine the ID Document, Face L
 
 **What default ports do the Faceplugin server SDKs use?**
 
-ID Document Recognition uses 8082, Face Recognition uses 8083, Face Liveness uses 8084 and ID Document Liveness uses 8086. Demo apps run on 9002, 9003, 9004 and 9006 respectively.
+ID Document Recognition uses 8082, Face Recognition uses 8092, Face Liveness uses 8084 and ID Document Liveness uses 8086. Demo apps run on 9002, 9092, 9004 and 9006 respectively.
 
 ### Related documentation
 

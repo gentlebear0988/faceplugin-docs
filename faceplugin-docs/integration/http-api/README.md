@@ -42,7 +42,7 @@ Paths do **not** include `/v1`.
 | Product                 | Default port | What it does                             |
 | ----------------------- | -----------: | ---------------------------------------- |
 | ID Document Recognition |         8082 | OCR, MRZ, barcode, optional authenticity |
-| Face Recognition        |         8083 | Detect, quality, template, 1:1 match     |
+| Face Recognition        |         8092 | Detect, quality, template, 1:1 match, 1:N identify |
 | Face Liveness           |         8084 | Score one face image for spoofing        |
 | ID Document Liveness    |         8086 | Document authenticity only               |
 

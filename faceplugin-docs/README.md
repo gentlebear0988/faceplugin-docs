@@ -58,7 +58,7 @@ This documentation is the **integration** layer: clone a public GitHub sample, a
 4. Copy the **machine code** if you run a server SDK, then [request a license](help/request-a-license-and-support.md).
 5. Use [Try it](getting-started/try-it.md) and the [HTTP API](integration/http-api/) to call the same server APIs from your app. Store templates and document JSON in **your** database.
 
-Ports: Document **8082**, Face Recognition **8083**, Face Liveness **8084**, Document Liveness **8086**.
+Ports: Document **8082**, Face Recognition **8092**, Face Liveness **8084**, Document Liveness **8086**.
 
 For topology and sizing, see [Deploy and host](integration/deploy-and-host/).
 
@@ -70,7 +70,7 @@ Each GitHub sample app is a complete application for testing. In production, use
 
 ### Our Products
 
-<table data-view="cards"><thead><tr><th></th><th></th><th data-hidden data-card-cover data-type="image">Cover image</th><th data-hidden></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Face SDK</strong></td><td>Recognition, liveness, and recognition + liveness — mobile and server</td><td><a href="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/android/identify.png">https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/android/identify.png</a></td><td></td><td><a href="products/face-recognition-sdk/">face-recognition-sdk</a></td></tr><tr><td><strong>ID Document SDK</strong></td><td>Passport OCR, authenticity-only liveness, and OCR + authenticity — 16,900 templates</td><td><a href="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/document-reader/mobile/camera.png">https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/document-reader/mobile/camera.png</a></td><td></td><td><a href="products/id-document-recognition-sdk/">id-document-recognition-sdk</a></td></tr></tbody></table>
+<table data-view="cards"><thead><tr><th></th><th></th><th data-hidden data-card-cover data-type="image">Cover image</th><th data-hidden></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Face SDK</strong></td><td>Recognition and liveness on the server, and both together in one mobile SDK</td><td><a href="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/identify.gif">https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/mobile/identify.gif</a></td><td></td><td><a href="products/face-recognition-sdk/">face-recognition-sdk</a></td></tr><tr><td><strong>ID Document SDK</strong></td><td>Passport OCR, authenticity-only liveness, and OCR + authenticity — 16,900 templates</td><td><a href="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/document-reader/mobile/camera.png">https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/document-reader/mobile/camera.png</a></td><td></td><td><a href="products/id-document-recognition-sdk/">id-document-recognition-sdk</a></td></tr></tbody></table>
 
 ### Try our SDKs
 
@@ -83,7 +83,7 @@ Each GitHub sample app is a complete application for testing. In production, use
 ### Features <a href="#feature" id="feature"></a>
 
 * Offline after license activation — no Faceplugin cloud inference
-* HTTP APIs on ports **8082** (documents), **8083** (face recognition), **8084** (face liveness), **8086** (document liveness)
+* HTTP APIs on ports **8082** (documents), **8092** (face recognition), **8084** (face liveness), **8086** (document liveness)
 * Mobile SDKs for Android, iOS, Flutter, React Native, and Ionic (platform support varies by product)
 
 ### Platforms <a href="#platform" id="platform"></a>

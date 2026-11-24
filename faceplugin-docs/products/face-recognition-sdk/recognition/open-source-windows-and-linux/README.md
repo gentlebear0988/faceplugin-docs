@@ -1,8 +1,7 @@
 ---
 description: >-
-  Free on-premise Python Face Recognition sample for Windows and Linux. Detect,
-  embed, and compare faces locally. Lower accuracy than Faceplugin’s commercial
-  HTTP API on port 8083.
+  Free on-premise open source Face Recognition SDKs: a Python sample for Windows
+  and Linux, and JavaScript, React and Vue SDKs that run in the browser.
 icon: code
 ---
 
@@ -17,6 +16,18 @@ icon: code
 The **Open Source Face Recognition SDK** is a free Python sample for Windows and Linux. It detects faces, extracts embeddings, and compares them on your machine (no Faceplugin cloud).
 
 Accuracy is lower than the commercial Face Recognition SDK. Contact Faceplugin if you need the higher-accuracy native engine. This sample is **not** the commercial Android/iOS or HTTP engine.
+
+### The open source family
+
+| SDK | Runs on | Page |
+| --- | ------- | ---- |
+| **Face Recognition (Python)** | Windows, Linux | [Linux](open-source-face-recognition-linux-sdk.md) · [Windows](open-source-face-recognition-windows-sdk.md) |
+| **Face Recognition JavaScript** | The browser, with ONNX Runtime Web and OpenCV.js | [JavaScript](open-source-face-recognition-javascript-sdk.md) |
+| **Face Recognition React** | React apps | [React](open-source-face-recognition-react-sdk.md) |
+| **Face Recognition Vue** | Vue apps | [Vue](open-source-face-recognition-vue-sdk.md) |
+| **Face Liveness Detection (Python)** | Windows, Linux | [Open Source Liveness](../../liveness-detection-sdk/open-source-face-liveness-detection-sdk.md) |
+
+The web SDKs run entirely in the browser, so no image leaves the page. They cover face detection, landmarks, liveness, pose, expression, eye closeness, age, gender and recognition.
 
 ### Setup <a href="#setup" id="setup"></a>
 
