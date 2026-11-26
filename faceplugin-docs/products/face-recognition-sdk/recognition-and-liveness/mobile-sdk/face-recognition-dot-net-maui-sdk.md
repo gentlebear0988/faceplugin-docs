@@ -43,8 +43,8 @@ The project references the AAR, and compiles `FaceBridge.java`, only when that f
 git clone https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-DotNet-MAUI.git
 cd FaceRecognition-LivenessDetection-DotNet-MAUI
 # place the AAR and the iOS frameworks first
-python run_android
-python run_ios          # macOS
+python run_android.py
+python run_ios.py          # macOS
 ```
 
 The run scripts are the same as:

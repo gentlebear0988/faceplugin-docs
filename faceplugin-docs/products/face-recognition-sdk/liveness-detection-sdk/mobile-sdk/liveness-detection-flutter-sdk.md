@@ -79,7 +79,7 @@ cd example
 flutter run
 ```
 
-Or `python3 run_android` / `python3 run_ios` from the repository root. Wait for the home status to read **Ready**.
+Or `python3 run_android.py` / `python3 run_ios.py` from the repository root. Wait for the home status to read **Ready**.
 {% endstep %}
 {% endstepper %}
 

@@ -180,7 +180,7 @@ Objective-C and Swift apps should use `FaceLivenessKit` and the screens directly
 1. Place the four engine bundles at the repository root (see Setup).
 2. Open `FaceLivenessSDK.xcodeproj`, select scheme **FaceLivenessDetectioniOS**, set your **Team**.
 3. Keep the bundle id **`com.faceplugin.faceliveness.app`**.
-4. Prefer a **USB** iPhone — Wi‑Fi debugging often hangs LLDB. Or run `python3 run_ios`.
+4. Prefer a **USB** iPhone — Wi‑Fi debugging often hangs LLDB. Or run `python3 run_ios.py`.
 5. Home tiles: **Active liveness**, **Passive liveness**, Settings, About.
 
 ### Screenshots

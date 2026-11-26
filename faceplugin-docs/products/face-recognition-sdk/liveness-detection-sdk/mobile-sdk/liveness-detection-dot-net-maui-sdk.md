@@ -98,7 +98,7 @@ dotnet build -t:Run -f net8.0-android
 dotnet build -t:Run -f net8.0-ios
 ```
 
-Or `python3 run_android` / `python3 run_ios`. Wait for the home status to read **Ready**.
+Or `python3 run_android.py` / `python3 run_ios.py`. Wait for the home status to read **Ready**.
 {% endstep %}
 {% endstepper %}
 
