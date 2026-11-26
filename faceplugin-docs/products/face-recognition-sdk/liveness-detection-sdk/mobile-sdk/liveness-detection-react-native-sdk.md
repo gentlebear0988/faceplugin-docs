@@ -49,13 +49,11 @@ Node **18+**, JDK **17**, Android Studio and/or Xcode 15+. A physical phone with
 {% endstep %}
 
 {% step %}
-#### Clone and install
+#### Clone
 
 ```bash
 git clone https://github.com/Faceplugin-ltd/FaceLivenessDetection-ReactNative.git
 cd FaceLivenessDetection-ReactNative
-yarn install
-cd example && yarn install
 ```
 {% endstep %}
 
@@ -77,13 +75,19 @@ The podspec fails the build with the missing list if any bundle is absent.
 #### Run on a device
 
 ```bash
-cd example
-yarn android          # or: yarn ios
+python run_android.py        # or: python run_ios.py on macOS
 ```
 
-Or `python3 run_android.py` / `python3 run_ios.py` from the repository root. Wait for the home status to read **Ready**.
+That is the whole setup. The script runs the yarn workspace install, generates the JS bundle, runs `pod install` on macOS, builds, and installs onto the plugged-in phone. Wait for the home status to read **Ready**.
 {% endstep %}
 {% endstepper %}
+
+**Running it by hand.** The script is a convenience, not a requirement — the same sequence, with the runtime already in place:
+
+```bash
+yarn install
+cd example && yarn android      # or: yarn ios
+```
 
 Keep the demo ids so the included license works:
 

@@ -49,14 +49,11 @@ Node **18+**, JDK **17**, Android Studio and/or Xcode 15+. Capacitor **6**. A ph
 {% endstep %}
 
 {% step %}
-#### Clone, install, build the plugin
+#### Clone
 
 ```bash
 git clone https://github.com/Faceplugin-ltd/FaceLivenessDetection-Ionic-Capacitor.git
 cd FaceLivenessDetection-Ionic-Capacitor
-npm install
-npm run build
-cd example && npm install
 ```
 {% endstep %}
 
@@ -77,18 +74,23 @@ On Android the AAR goes in the **`libfacesdk` flat artifact module**, not in `an
 {% endstep %}
 
 {% step %}
-#### Sync and run
+#### Run on a device
 
 ```bash
-cd example
-npm run build
-npx cap sync
-npx cap open android      # or: npx cap open ios
+python run_android.py        # or: python run_ios.py on macOS
 ```
 
-Wait for the home status to read **Ready**.
+That is the whole setup. The script runs `npm install`, builds the plugin and the example, runs `npx cap sync`, and installs onto the plugged-in phone. Wait for the home status to read **Ready**.
 {% endstep %}
 {% endstepper %}
+
+**Running it by hand.** The script is a convenience, not a requirement — the same sequence, with the runtime already in place:
+
+```bash
+npm install && npm run build
+cd example && npm install && npm run build
+npx cap sync android && npx cap run android
+```
 
 Keep the demo ids so the included license works:
 

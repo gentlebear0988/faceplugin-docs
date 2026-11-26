@@ -49,12 +49,11 @@ Node **18+**, JDK **17**, Cordova **12** (`cordova-android` 13, `cordova-ios` 8.
 {% endstep %}
 
 {% step %}
-#### Clone and install
+#### Clone
 
 ```bash
 git clone https://github.com/Faceplugin-ltd/FaceLivenessDetection-Ionic-Cordova.git
 cd FaceLivenessDetection-Ionic-Cordova
-npm install
 ```
 
 The repository root **is** the demo app; the plugin lives in `FacePlugin/`.
@@ -81,15 +80,23 @@ Place these **before** adding a platform — the prepare hooks copy and re-sign 
 {% endstep %}
 
 {% step %}
-#### Build and run
+#### Run on a device
 
 ```bash
-npm run android          # or: npm run ios
+python run_android.py        # or: python run_ios.py on macOS
 ```
 
-Wait for the home status to read **Ready**.
+That is the whole setup. The script runs `npm install`, adds the platform on the first run, runs `cordova prepare`, builds, and installs onto the plugged-in phone. Wait for the home status to read **Ready**.
 {% endstep %}
 {% endstepper %}
+
+**Running it by hand.** The script is a convenience, not a requirement — the same sequence, with the runtime already in place:
+
+```bash
+npm install
+npm run setup:android     # once: adds the platform, installs the plugin, prepares
+npm run android
+```
 
 Keep the demo ids so the included license works:
 

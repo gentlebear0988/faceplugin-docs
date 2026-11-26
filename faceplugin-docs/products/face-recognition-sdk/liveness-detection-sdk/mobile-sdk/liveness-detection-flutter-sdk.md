@@ -45,13 +45,11 @@ Flutter **3.22+** (Dart SDK 3.3+), JDK **17**, Android Studio and/or Xcode 15+. 
 {% endstep %}
 
 {% step %}
-#### Clone and fetch
+#### Clone
 
 ```bash
 git clone https://github.com/Faceplugin-ltd/FaceLivenessDetection-Flutter.git
 cd FaceLivenessDetection-Flutter
-flutter pub get
-cd example && flutter pub get
 ```
 {% endstep %}
 
@@ -75,13 +73,19 @@ On Android the AAR goes in the **`libfacesdk` flat artifact module**, not in `an
 #### Run on a device
 
 ```bash
-cd example
-flutter run
+python run_android.py        # or: python run_ios.py on macOS
 ```
 
-Or `python3 run_android.py` / `python3 run_ios.py` from the repository root. Wait for the home status to read **Ready**.
+That is the whole setup. The script runs `flutter pub get` in the plugin and the example, `pod install` on macOS, builds, and installs onto the plugged-in phone. Wait for the home status to read **Ready**.
 {% endstep %}
 {% endstepper %}
+
+**Running it by hand.** The script is a convenience, not a requirement — the same sequence, with the runtime already in place:
+
+```bash
+flutter pub get
+cd example && flutter pub get && flutter run
+```
 
 Keep the demo ids so the included license works:
 

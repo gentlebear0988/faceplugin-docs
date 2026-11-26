@@ -49,13 +49,11 @@ Node **18+**, Yarn, and a React Native environment ([setup guide](https://reactn
 {% endstep %}
 
 {% step %}
-#### Clone and install
+#### Clone
 
 ```bash
 git clone https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-ReactNative.git
 cd FaceRecognition-LivenessDetection-ReactNative
-yarn
-cd example && yarn
 ```
 {% endstep %}
 
@@ -77,21 +75,22 @@ Native binaries are **not** on GitHub (too large).
 #### Run on a phone
 
 ```bash
-cd example
-yarn android
+python run_android.py        # or: python run_ios.py on macOS
 ```
 
-On macOS for iOS:
+That is the whole setup. The script runs the yarn workspace install, `pod install` on macOS, builds, and installs onto the plugged-in phone. Open `example/ios/FaceRecognitionSdkExample.xcworkspace` in Xcode instead if you prefer. Wait until the home status bar shows **Ready**.
+{% endstep %}
+{% endstepper %}
+
+**Running it by hand.** The script is a convenience, not a requirement — the same sequence, with the runtime already in place:
 
 ```bash
-cd example
+yarn
+cd example && yarn
+yarn android                       # or, on macOS:
 cd ios && pod install && cd ..
 yarn ios --device
 ```
-
-Open `example/ios/FaceRecognitionSdkExample.xcworkspace` in Xcode if you prefer. Wait until the home status bar shows **Ready**.
-{% endstep %}
-{% endstepper %}
 
 Keep the demo package name **`com.faceplugin.facerecognitionsdk`** on Android and iOS so the sample key works.
 

@@ -45,12 +45,11 @@ Flutter **3.44+** and Dart **3.3+** (from the package `pubspec.yaml`), JDK **17+
 {% endstep %}
 
 {% step %}
-#### Clone and bootstrap
+#### Clone
 
 ```bash
 git clone https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Flutter.git
 cd FaceRecognition-LivenessDetection-Flutter
-dart run tool/bootstrap.dart
 ```
 {% endstep %}
 
@@ -69,20 +68,26 @@ dart run tool/bootstrap.dart
 Do **not** `implementation(files(…aar))` inside the plugin — AGP will fail `bundleDebugAar`. Copy the `libfacesdk` **module** from the example into your app.
 {% endhint %}
 
-On a Mac after placing iOS frameworks: `dart run tool/bootstrap.dart` (builds matching `.xcframework`s) then `cd example/ios && pod install`. CocoaPods links the `.xcframework`s into the plugin pod — plain `.framework` alone often leaves undefined `FaceRecognitionSDK` symbols under `use_frameworks!`.
+On macOS, `run_ios.py` extracts the `ios-arm64` slice from each xcframework and runs `pod install` for you. Doing it by hand instead, plain `.framework` alone often leaves undefined `FaceRecognitionSDK` symbols under `use_frameworks!`.
 {% endstep %}
 
 {% step %}
 #### Run the example
 
 ```bash
-cd example
-flutter run
+python run_android.py        # or: python run_ios.py on macOS
 ```
 
-Physical phone. Wait for the home status bar → **Ready**.
+That is the whole setup. The script runs `flutter pub get` in the plugin and the example, `pod install` on macOS, builds, and installs onto the plugged-in phone. Wait for the home status bar → **Ready**.
 {% endstep %}
 {% endstepper %}
+
+**Running it by hand.** The script is a convenience, not a requirement — the same sequence, with the runtime already in place:
+
+```bash
+flutter pub get
+cd example && flutter pub get && flutter run
+```
 
 Keep demo ids so the included license works:
 

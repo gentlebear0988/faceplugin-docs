@@ -93,14 +93,19 @@ All are device-only (`ios-arm64`). The build fails with a named message listing 
 #### Build and run
 
 ```bash
-dotnet build -t:Run -f net8.0-android
-# or
-dotnet build -t:Run -f net8.0-ios
+python run_android.py        # or: python run_ios.py on macOS
 ```
 
-Or `python3 run_android.py` / `python3 run_ios.py`. Wait for the home status to read **Ready**.
+That is the whole setup. The script restores, builds and installs onto the plugged-in phone — the equivalent of `dotnet build -t:Run -f net8.0-android`. Wait for the home status to read **Ready**.
 {% endstep %}
 {% endstepper %}
+
+**Running it by hand.** The script is a convenience, not a requirement — the same sequence, with the runtime already in place:
+
+```bash
+dotnet build src/FaceLiveness.Net.Maui/FaceLiveness.Net.Maui.csproj -f net8.0-android -t:Run
+dotnet build src/FaceLiveness.Net.Maui/FaceLiveness.Net.Maui.csproj -f net8.0-ios -t:Run     # macOS
+```
 
 Keep the demo ids so the included license works:
 
