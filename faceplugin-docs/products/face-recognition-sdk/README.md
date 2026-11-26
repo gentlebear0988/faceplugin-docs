@@ -20,7 +20,7 @@ The face recognition engine in the Face SDK was submitted to the U.S. **National
 | --------------------- | ------------------------------------------------------------------------------------------------- |
 | **Algorithm**         | faceplugin-000                                                                                    |
 | **Evaluation**        | NIST FRTE 1:1 Verification (formerly FRVT 1:1)                                                    |
-| **Submitted to NIST** | \[FILL IN: submission date from report card]                                                      |
+| **Submitted to NIST** | Oct 15, 2026                                                                                      |
 | **Report card**       | [faceplugin\_000 on face.nist.gov](https://face.nist.gov/frte/reportcards/11/faceplugin_000.html) |
 
 {% hint style="info" %}
