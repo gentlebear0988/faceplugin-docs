@@ -54,7 +54,7 @@ Keep the demo package name **`com.faceplugin.faceliveness`** so the sample licen
 | `app` | The demo, built from those two libraries |
 | `libs/` | `facerecognitionsdk.aar`, the engine |
 
-Both libraries are also published to Maven Central as `com.faceplugin:face-liveness-kit` and `com.faceplugin:face-liveness-active`.
+Both libraries are built from this repository. Copy the two modules into your project, or take the prebuilt AARs from `liveness-libs.zip` on the [Releases page](https://github.com/Faceplugin-ltd/FaceLivenessDetection-Android/releases/latest) — that is what the [.NET MAUI SDK](liveness-detection-dot-net-maui-sdk.md) consumes.
 
 ### Setup <a href="#setup" id="setup"></a>
 

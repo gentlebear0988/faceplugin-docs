@@ -69,11 +69,11 @@ Three AARs go in `src/FaceLiveness.Net.Maui/Platforms/Android/libs/`:
 
 | File | Where it comes from |
 | ---- | ------------------- |
-| `facerecognitionsdk.aar` | The [Android release](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Android/releases/tag/latest) |
-| `face-liveness-kit.aar` | `./gradlew :face-liveness-kit:assembleRelease` in the Android repository |
-| `face-liveness-active.aar` | `./gradlew :face-liveness-active:assembleRelease` in the Android repository |
+| `facerecognitionsdk.aar` | The [engine release](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Android/releases/tag/latest) |
+| `face-liveness-kit.aar` | `liveness-libs.zip` on the [FaceLivenessDetection-Android release](https://github.com/Faceplugin-ltd/FaceLivenessDetection-Android/releases/latest) |
+| `face-liveness-active.aar` | the same `liveness-libs.zip` |
 
-The two library AARs are also on Maven Central as `com.faceplugin:face-liveness-kit` and `com.faceplugin:face-liveness-active`.
+All three are downloads. Unzip `liveness-libs.zip` and place both AARs beside the engine. Building them from source with `./gradlew :face-liveness-kit:assembleRelease :face-liveness-active:assembleRelease` stays available if you want to.
 {% endstep %}
 
 {% step %}
@@ -81,8 +81,10 @@ The two library AARs are also on Maven Central as `com.faceplugin:face-liveness-
 
 Six bundles go in `src/FaceLiveness.Net.Maui/Platforms/iOS/Frameworks/`:
 
-* `FaceLivenessBridge.xcframework` and `FaceLivenessKit.xcframework` — built from the iOS repository with `./scripts/build_bridge.sh`
-* `facerecognitionsdk.framework`, `FacePluginSDK.xcframework`, `FacePlugin.xcframework`, `FaceDetect.xcframework` — from the [iOS release](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-iOS/releases/tag/latest)
+* `FaceLivenessBridge.xcframework` and `FaceLivenessKit.xcframework` — `bridge.zip` on the [FaceLivenessDetection-iOS release](https://github.com/Faceplugin-ltd/FaceLivenessDetection-iOS/releases/latest)
+* `facerecognitionsdk.framework`, `FacePluginSDK.xcframework`, `FacePlugin.xcframework`, `FaceDetect.xcframework` — `runtime.zip` on the [engine release](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-iOS/releases/tag/latest)
+
+Unzip both archives into `Frameworks/`. Because the bridge is a download, **you do not need a Mac** to build this app — only to rebuild the bridge yourself with `./scripts/build_bridge.sh`.
 
 All are device-only (`ios-arm64`). The build fails with a named message listing whichever is missing.
 {% endstep %}

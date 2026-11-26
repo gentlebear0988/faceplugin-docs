@@ -165,11 +165,13 @@ Swift-only API — structs, enums with associated values — is invisible to Obj
 
 **FaceLivenessBridge** is a framework target in the project whose only job is to put an `@objc` face on the same screens: `FPLEngine`, `FPLActiveOptions`, `FPLActiveResult`, `FPLLiveness`, all `NSObject`s and `Int`-backed enums. It adds no behaviour and compiles the *same source files* the app does, so the two cannot drift.
 
+Both xcframeworks are published as `bridge.zip` on the [Releases page](https://github.com/Faceplugin-ltd/FaceLivenessDetection-iOS/releases/latest), so a host does not need a Mac to consume them. A host embeds `FaceLivenessBridge.xcframework` and `FaceLivenessKit.xcframework` along with the four engine bundles. **Device only** (`ios-arm64`).
+
+To rebuild them yourself, on macOS with Xcode:
+
 ```bash
 ./scripts/build_bridge.sh            # → build/xcframeworks/
-```
-
-That produces `FaceLivenessBridge.xcframework` and `FaceLivenessKit.xcframework`, which a host embeds along with the four engine bundles. **Device only** (`ios-arm64`). The wire values it reports — challenge keys, outcome and failure names — are the ones Android uses, so a cross-platform host can treat both platforms identically. The [.NET MAUI SDK](liveness-detection-dot-net-maui-sdk.md) is built on it.
+``` The wire values it reports — challenge keys, outcome and failure names — are the ones Android uses, so a cross-platform host can treat both platforms identically. The [.NET MAUI SDK](liveness-detection-dot-net-maui-sdk.md) is built on it.
 
 Objective-C and Swift apps should use `FaceLivenessKit` and the screens directly; the bridge exists only for hosts that cannot read a Swift interface.
 
