@@ -38,7 +38,7 @@ All shipping server products are **CPU only**. There is no `lib/gpu/` package in
 | Product                            | API port | Gradio (host only) | Docker image                               | Role                                             |
 | ---------------------------------- | -------: | -----------------: | ------------------------------------------ | ------------------------------------------------ |
 | ID Document Recognition + Liveness |     8082 |               9002 | `faceplugin/document-reader`               | **Recommended** for OCR + authenticity           || Face Recognition (only)            |     8092 |               9092 | `faceplugin/face-recognition`              | Match only — no `/api/liveness`                  |
-| Face Liveness (only)               |     8084 |               9004 | `faceplugin/face-liveness`                 | PAD only — use when you do not need match        |
+| Face Liveness (only)               |     8093 |               9093 | `faceplugin/face-liveness`                 | PAD only — use when you do not need match        |
 | ID Document Liveness (only)        |     8086 |               9006 | `faceplugin/document-liveness`             | Authenticity only — use when you do not need OCR |
 
 Gradio is for local demos. Do not expose it in production. See [Production deployment](production-deployment.md).

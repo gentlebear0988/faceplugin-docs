@@ -12,7 +12,7 @@ What the Faceplugin **Face SDK** can do — **recognition**, **liveness**, and *
 | Mode                       | What you get                                            | Start install                                       |
 | -------------------------- | ------------------------------------------------------- | --------------------------------------------------- |
 | **Recognition**            | Detect, quality, templates, 1:1 verification, 1:N identification | [Recognition](recognition/)                |
-| **Liveness**               | Standalone passive face anti-spoofing (no gallery)      | [Liveness](liveness-detection-sdk/)                 |
+| **Liveness**               | Standalone face anti-spoofing, no gallery — passive and active on mobile, passive on the server | [Liveness](liveness-detection-sdk/)                 |
 | **Recognition + Liveness** | Recognition and passive 2D liveness in one mobile SDK | [Recognition + Liveness](recognition-and-liveness/) |
 
 ```mermaid
@@ -57,9 +57,14 @@ Mobile **1:N Identify** includes passive 2D liveness (default threshold **0.5**)
 
 Routes also answer under `/api/v1`. Image: `faceplugin/face-recognition` (tags `latest` for **Lite** and `latest-plus` for **Plus**). See [Docker](recognition/server-sdk/face-recognition-linux-sdk.md) · [Windows](recognition/server-sdk/face-recognition-windows-sdk.md).
 
-### Face Liveness Detection: Passive Anti-Spoofing (PAD)
+### Face Liveness Detection: Passive and Active Anti-Spoofing (PAD)
 
-Standalone **passive** presentation-attack detection: scores a camera frame or JPEG **without** a smile / turn-head challenge.
+Standalone presentation-attack detection in two modes:
+
+* **Passive** — the engine scores a single camera frame or JPEG **without** asking the user to do anything. Available on mobile and on the server.
+* **Active** — mobile only. The face is scored for spoofing first, as an anti-spoofing gate; only a face that clears the gate is asked for a short shuffled sequence of challenges (blink, smile, turn left/right, look up/down, move closer). The result object reports the gate score and every challenge outcome.
+
+The server SDKs (Windows, Linux/Docker) are **passive only** — there is no active liveness over HTTP.
 
 In internal testing following **ISO/IEC 30107-3** at the default threshold, **no genuine presentation was rejected on either platform** — **BPCER 0%** on the phone and on the server. Attacks accepted (**APCER**) were **3.5–5.5%** on the phone and **0.5–1.5%** on the server, across printed photos, screen replays (photo and video) and 3D masks: the phone scores live camera frames, while the server scores a finished image. Both rates move with the threshold. This is an internal FacePlugin QA evaluation; these docs do **not** claim iBeta certification. See [Liveness](liveness-detection-sdk/) for the trade-off and how to choose a threshold.
 
@@ -74,12 +79,12 @@ Score **≥ 0.5** → Real / pass (server default threshold in these docs).
 
 | Surface             | Behavior                                                      |
 | ------------------- | ------------------------------------------------------------- |
-| **Android / iOS**   | Live camera + VideoWorker / `faceDetection` for anti-spoofing |
-| **Linux / Windows** | `POST /api/liveness` with one RGB JPEG on port **8084**       |
+| **Mobile** (Android, iOS, Flutter, React Native, Ionic Capacitor, Ionic Cordova, .NET MAUI) | Live camera anti-spoofing, passive or active (gate + challenges) |
+| **Linux / Windows** | `POST /api/liveness` with one RGB JPEG on port **8093**, passive only |
 
 **Example: check liveness with curl**
 
-<pre class="language-bash"><code class="lang-bash"><strong>curl -s -X POST http://127.0.0.1:8084/api/liveness \
+<pre class="language-bash"><code class="lang-bash"><strong>curl -s -X POST http://127.0.0.1:8093/api/liveness \
 </strong>  -H 'Content-Type: application/json' \
   -d "{\"image\":\"$IMG\"}"
 </code></pre>
@@ -100,14 +105,14 @@ Images: `faceplugin/face-liveness`. See [Linux](liveness-detection-sdk/server-sd
 | Mode                   | Available as                                                                                                                                                                                                                                                                                                                                                  |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Recognition            | [Server SDK](recognition/server-sdk/) (`faceplugin/face-recognition`, Lite and Plus) · [Open Source](recognition/open-source-windows-and-linux/)                                                                                                                                                                                                            |
-| Liveness               | [Mobile SDK](liveness-detection-sdk/mobile-sdk/) · [Server SDK](liveness-detection-sdk/server-sdk/) (**8084**)                                                                                                                                                                                                                                                |
+| Liveness               | [Mobile SDK](liveness-detection-sdk/mobile-sdk/) — Android, iOS, Flutter, React Native, Ionic Capacitor, Ionic Cordova and .NET MAUI (passive **and** active) · [Server SDK](liveness-detection-sdk/server-sdk/) (**8093**, passive only)                                                                                                                                                                                                                                                |
 | Recognition + Liveness | [Mobile SDK](recognition-and-liveness/mobile-sdk/) — Android, iOS, Flutter, React Native, .NET MAUI, Ionic Capacitor and Ionic Cordova. Mobile only. |
 
 ### Use cases
 
 * **Access control and time attendance:** enroll face templates and run live 1:N identification at doors, gates and terminals.
 * **eKYC selfie verification:** run passive anti-spoofing before, or together with, face matching.
-* **Server-side fraud checks:** still-image detection, matching, similarity and 1:N identification on port 8092, plus liveness as its own service on port 8084.
+* **Server-side fraud checks:** still-image detection, matching, similarity and 1:N identification on port 8092, plus liveness as its own service on port 8093.
 
 ### Frequently Asked Questions
 
@@ -125,7 +130,7 @@ No. Store face templates in your own database and compare them with `/api/simila
 
 **What is the difference between Identify's 2D liveness and the standalone Liveness SDK?**
 
-Identify builds 2D liveness into face matching on mobile. The standalone Liveness SDK does anti-spoofing only, on mobile or on the server at port 8084.
+Identify builds 2D liveness into face matching on mobile. The standalone Liveness SDK does anti-spoofing only — passive or active on mobile, passive on the server at port 8093.
 
 **What liveness score counts as a real face?**
 

@@ -14,7 +14,11 @@ Published release notes for Faceplugin SDKs will be listed here.
 
 * **HTTP API hub** — shared and per-product endpoint reference under [HTTP API](../../integration/http-api/)
 * **Deploy and host** — [Architecture](../../integration/deploy-and-host/architecture.md), [Hosting requirements](../../integration/deploy-and-host/hosting-requirements.md), [Production deployment](../../integration/deploy-and-host/production-deployment.md)
-* **Recognition + Liveness is mobile only** — the combined server package is gone. On a server, run [Face Recognition](../../products/face-recognition-sdk/recognition/server-sdk/) on **8092** and [Face Liveness](../../products/face-recognition-sdk/liveness-detection-sdk/server-sdk/) on **8084** as two services.
+* **Recognition + Liveness is mobile only** — the combined server package is gone. On a server, run [Face Recognition](../../products/face-recognition-sdk/recognition/server-sdk/) on **8092** and [Face Liveness](../../products/face-recognition-sdk/liveness-detection-sdk/server-sdk/) on **8093** as two services.
+* **Face Liveness server ports moved** — the API is now **8093** (was 8084) and the Gradio demo **9093** (was 9004). Set `PORT` / `FACESDK_PORT` if you need the old numbers.
+* **Active liveness on mobile** — the Face Liveness mobile SDK adds an active mode: an anti-spoofing gate, then a shuffled challenge sequence (blink, smile, turn left/right, look up/down, move closer). The server SDKs stay passive only.
+* **Face Liveness covers nine platforms** — Android, iOS, Flutter, React Native, Ionic Capacitor, Ionic Cordova and .NET MAUI on mobile, plus Windows and Linux/Docker on the server.
+* **New mobile liveness engine** — the mobile SDK now uses the Face Recognition engine build (`facerecognitionsdk.aar` / `facerecognitionsdk.framework` with the `FacePluginSDK`, `FacePlugin` and `FaceDetect` xcframeworks) in place of the retired `facelivenessdk`.
 * **Lite and Plus editions** — the Face Recognition server ships as `faceplugin/face-recognition:latest` (Lite) and `:latest-plus` (Plus), and as two archives on the Windows release page.
 * **Runtimes come from GitHub Releases** — the mobile engines and the server runtime packs are attached to each repository's release instead of a shared drive.
 * **.NET MAUI joins the mobile line-up** — see [.NET MAUI](../../products/face-recognition-sdk/recognition-and-liveness/mobile-sdk/face-recognition-dot-net-maui-sdk.md).

@@ -21,7 +21,7 @@ Need a vendor comparison? See [SDK comparison](../help/comparisons/).
 | Passport OCR / MRZ / ID card verification     | [ID Document capabilities](../products/id-document-recognition-sdk/capabilities.md) → [ID Document SDK](../products/id-document-recognition-sdk/) · [Recognition](../products/id-document-recognition-sdk/recognition.md)                                                                                                                                                                                                                                                           |
 | Match faces 1:1 or 1:N / Face Recognition API | [Face SDK capabilities](../products/face-recognition-sdk/capabilities.md) → [Face SDK](../products/face-recognition-sdk/) · [Recognition](../products/face-recognition-sdk/recognition/)                                                                                                                                                                                                                                                                                            |
 | Face anti-spoofing only                       | [Face SDK capabilities](../products/face-recognition-sdk/capabilities.md) → [Liveness](../products/face-recognition-sdk/liveness-detection-sdk/)                                                                                                                                                                                                                                                                                                                                    |
-| Recognition and anti-spoofing together        | On a phone, use [Face Recognition + Liveness Mobile](../products/face-recognition-sdk/recognition-and-liveness/mobile-sdk/), which does both on the device. On a server, run [Face Recognition](../products/face-recognition-sdk/recognition/server-sdk/) on **8092** and [Face Liveness](../products/face-recognition-sdk/liveness-detection-sdk/server-sdk/) on **8084** as two services—never mix their runtime folders. |
+| Recognition and anti-spoofing together        | On a phone, use [Face Recognition + Liveness Mobile](../products/face-recognition-sdk/recognition-and-liveness/mobile-sdk/), which does both on the device. On a server, run [Face Recognition](../products/face-recognition-sdk/recognition/server-sdk/) on **8092** and [Face Liveness](../products/face-recognition-sdk/liveness-detection-sdk/server-sdk/) on **8093** as two services—never mix their runtime folders. |
 | Document authenticity **without** OCR         | [ID Document Liveness SDK](../products/id-document-recognition-sdk/id-document-liveness-sdk/)                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ### ID Document Recognition SDK: Passport, ID Card and Driver's License OCR
@@ -74,19 +74,26 @@ Capability overview: [Face SDK capabilities](../products/face-recognition-sdk/ca
 
 The **Face Liveness Detection SDK** is a standalone **presentation attack detection (PAD)** engine that stops photo, screen and other spoofing attempts.
 
-* **Mobile SDKs** check liveness on the live camera feed using VideoWorker.
-* **Server SDKs** return a liveness score for a single RGB JPEG image.
+* **Mobile SDKs** offer two modes. **Passive** scores a single camera frame with nothing asked of the user. **Active** first scores the face for spoofing (an anti-spoofing gate), then asks a face that clears the gate for a short shuffled sequence of challenges — blink, smile, turn left/right, look up/down, move closer — and returns the gate score together with every challenge outcome.
+* **Server SDKs** are **passive only**: they return a liveness score for a single RGB JPEG image. There is no active liveness over HTTP.
 
 The **Face Liveness Detection SDK** is a standalone **presentation attack detection (PAD)** engine that stops photo, screen and other spoofing attempts.
 
 Capability overview: [Face SDK capabilities](../products/face-recognition-sdk/capabilities.md) (Liveness section).
 
-| Platform       | Clone                                                                                            | Package / image                         | Port                        |
-| -------------- | ------------------------------------------------------------------------------------------------ | --------------------------------------- | --------------------------- |
-| Android        | [FaceLivenessDetection-Android](https://github.com/Faceplugin-ltd/FaceLivenessDetection-Android) | `facelivenessdk.aar`                    | —                           |
-| iOS            | [FaceLivenessDetection-iOS](https://github.com/Faceplugin-ltd/FaceLivenessDetection-iOS)         | `facelivenessdk` + engine + onnxruntime | —                           |
-| Windows        | [FaceLivenessDetection-Windows](https://github.com/Faceplugin-ltd/FaceLivenessDetection-Windows) | `sdk.py` + `app.py`                     | API **8084**, demo **9004** |
-| Linux / Docker | [FaceLivenessDetection-Docker](https://github.com/Faceplugin-ltd/FaceLivenessDetection-Docker)   | `faceplugin/face-liveness`              | API **8084**, demo **9004** |
+| Platform        | Clone                                                                                                            | Package / image                                                                             | Port                        |
+| --------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | --------------------------- |
+| Android         | [FaceLivenessDetection-Android](https://github.com/Faceplugin-ltd/FaceLivenessDetection-Android)                 | `facerecognitionsdk.aar`                                                                    | —                           |
+| iOS             | [FaceLivenessDetection-iOS](https://github.com/Faceplugin-ltd/FaceLivenessDetection-iOS)                         | `facerecognitionsdk.framework` + `FacePluginSDK` / `FacePlugin` / `FaceDetect` xcframeworks | —                           |
+| Flutter         | [FaceLivenessDetection-Flutter](https://github.com/Faceplugin-ltd/FaceLivenessDetection-Flutter)                 | `face_liveness_sdk`                                                                         | —                           |
+| React Native    | [FaceLivenessDetection-ReactNative](https://github.com/Faceplugin-ltd/FaceLivenessDetection-ReactNative)         | `face-liveness-sdk`                                                                         | —                           |
+| Ionic Capacitor | [FaceLivenessDetection-Ionic-Capacitor](https://github.com/Faceplugin-ltd/FaceLivenessDetection-Ionic-Capacitor) | `face-liveness-capacitor`                                                                   | —                           |
+| Ionic Cordova   | [FaceLivenessDetection-Ionic-Cordova](https://github.com/Faceplugin-ltd/FaceLivenessDetection-Ionic-Cordova)     | `face-liveness-cordova`                                                                     | —                           |
+| .NET MAUI       | [FaceLivenessDetection-DotNet-MAUI](https://github.com/Faceplugin-ltd/FaceLivenessDetection-DotNet-MAUI)         | MAUI app project                                                                            | —                           |
+| Windows         | [FaceLivenessDetection-Windows](https://github.com/Faceplugin-ltd/FaceLivenessDetection-Windows)                 | `sdk.py` + `app.py`                                                                         | API **8093**, demo **9093** |
+| Linux / Docker  | [FaceLivenessDetection-Docker](https://github.com/Faceplugin-ltd/FaceLivenessDetection-Docker)                   | `faceplugin/face-liveness`                                                                  | API **8093**, demo **9093** |
+
+The mobile engine is the same build the Face Recognition product uses — `facerecognitionsdk.aar` with the public class `com.faceplugin.facerecognitionsdk.FaceRecognitionSDK` on Android, and `facerecognitionsdk.framework` plus the `FacePluginSDK.xcframework`, `FacePlugin.xcframework` (its `ios-arm64` slice is named `FacePPlugin.framework`) and `FaceDetect.xcframework` on iOS. Download it from the FaceRecognition-LivenessDetection-Android / -iOS GitHub releases.
 
 {% hint style="info" %}
 Face Recognition mobile apps already include **2D liveness on Identify**. Use the standalone Face Liveness product when you need anti-spoofing without enrollment / 1:N.
@@ -106,7 +113,7 @@ The **ID Document Liveness SDK** checks **document authenticity and detects docu
 
 Best practices for an on-premise eKYC deployment:
 
-* **Run one process or container per product.** For example, run the ID Document service on port **8082**, Face Recognition on **8092**, and Face Liveness on **8084**.
+* **Run one process or container per product.** For example, run the ID Document service on port **8082**, Face Recognition on **8092**, and Face Liveness on **8093**.
 * **Keep products separate.** Do not copy one product's runtime files into another product's `lib/cpu/` folder. Run each on its own server or container instead.
 * **Plan your architecture:** see  [Architecture](../integration/deploy-and-host/architecture.md) for topology and which component handles what.
 * **Size your servers:** see [Hosting requirements](../integration/deploy-and-host/hosting-requirements.md) for hardware sizing and Docker flags.
@@ -119,7 +126,7 @@ Use the ID Document Recognition SDK. It reads passports, national ID cards and d
 
 **Can I run face recognition and face liveness detection in one server?**
 
-On a phone, yes: the Recognition + Liveness mobile SDK does both on the device. On a server, run Face Recognition on **8092** and Face Liveness on **8084** as two services. You can also run them as two separate services on ports 8092 and 8084.
+On a phone, yes: the Recognition + Liveness mobile SDK does both on the device. On a server, run Face Recognition on **8092** and Face Liveness on **8093** as two services. You can also run them as two separate services on ports 8092 and 8093.
 
 **Does the Face Recognition server API support 1:N identification?**
 
@@ -131,7 +138,7 @@ No. Faceplugin provides the building blocks: you combine the ID Document, Face L
 
 **What default ports do the Faceplugin server SDKs use?**
 
-ID Document Recognition uses 8082, Face Recognition uses 8092, Face Liveness uses 8084 and ID Document Liveness uses 8086. Demo apps run on 9002, 9092, 9004 and 9006 respectively.
+ID Document Recognition uses 8082, Face Recognition uses 8092, Face Liveness uses 8093 and ID Document Liveness uses 8086. Demo apps run on 9002, 9092, 9093 and 9006 respectively.
 
 ### Related documentation
 

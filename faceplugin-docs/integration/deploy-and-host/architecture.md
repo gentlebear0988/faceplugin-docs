@@ -37,11 +37,11 @@ Face recognition and face liveness are **separate server products**. For face wo
 
 | Need                                 | Run                                                                                                                                                    | Notes                                                                           |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
-| Face match + face PAD                | [Face Recognition](../../products/face-recognition-sdk/recognition/server-sdk/) on **8092** (`faceplugin/face-recognition`) **and** [Face Liveness](../../products/face-recognition-sdk/liveness-detection-sdk/server-sdk/) on **8084** | Two processes, each with its own runtime folder                                 |
+| Face match + face PAD                | [Face Recognition](../../products/face-recognition-sdk/recognition/server-sdk/) on **8092** (`faceplugin/face-recognition`) **and** [Face Liveness](../../products/face-recognition-sdk/liveness-detection-sdk/server-sdk/) on **8093** | Two processes, each with its own runtime folder                                 |
 | Face match + face PAD on a phone     | [Face Recognition + Liveness Mobile](../../products/face-recognition-sdk/recognition-and-liveness/mobile-sdk/)                                         | One SDK, both on the device, no server at all                                   |
 | Document OCR + document authenticity | [Document Reader](../../products/id-document-recognition-sdk/recognition-and-liveness/) on **8082** with a Liveness-capable license                     | One product covers both                                                         |
 
-Use standalone [Face Liveness](../../products/face-recognition-sdk/liveness-detection-sdk/) (**8084**) or [ID Document Liveness](../../products/id-document-recognition-sdk/id-document-liveness-sdk/) (**8086**) when you want **anti-spoofing without** matching or OCR.
+Use standalone [Face Liveness](../../products/face-recognition-sdk/liveness-detection-sdk/) (**8093**) or [ID Document Liveness](../../products/id-document-recognition-sdk/id-document-liveness-sdk/) (**8086**) when you want **anti-spoofing without** matching or OCR.
 
 ### Typical eKYC flow
 
@@ -82,7 +82,7 @@ flowchart TB
   Backend --> Face8092
 ```
 
-Optional authenticity-only Document Liveness (**8086**) or Face Liveness (**8084**) only if you intentionally split services.
+Optional authenticity-only Document Liveness (**8086**) or Face Liveness (**8093**) only if you intentionally split services.
 
 ### One runtime per server
 

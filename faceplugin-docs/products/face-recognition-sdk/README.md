@@ -10,7 +10,7 @@ icon: face-viewfinder
 
 All processing runs on the device or on your own server, never in Faceplugin's cloud, so face data stays under your control.
 
-Faceplugin's face recognition algorithm (**faceplugin-000**) is independently tested by NIST in the [**FRTE 1:1 Verification**](https://pages.nist.gov/frvt/html/frvt11.html) benchmark (formerly FRVT). See the [NIST report card](https://face.nist.gov/frte/reportcards/11/faceplugin_000.html) and the results summary below. Server APIs run on **port 8092** (recognition) and **port 8084** (standalone liveness).
+Faceplugin's face recognition algorithm (**faceplugin-000**) is independently tested by NIST in the [**FRTE 1:1 Verification**](https://pages.nist.gov/frvt/html/frvt11.html) benchmark (formerly FRVT). See the [NIST report card](https://face.nist.gov/frte/reportcards/11/faceplugin_000.html) and the results summary below. Server APIs run on **port 8092** (recognition) and **port 8093** (standalone liveness).
 
 ### NIST FRTE 1:1 Face Recognition Accuracy
 
@@ -30,7 +30,7 @@ NIST does not endorse any product. Results apply to the algorithm version submit
 ### Three Ways to Use the Face SDK
 
 * [**Recognition**](recognition/) — recognition-only server API on **8092** (`faceplugin/face-recognition`).
-* [**Liveness**](liveness-detection-sdk/) — standalone face presentation attack detection (PAD) for mobile and for servers on port 8084, with no face matching.
+* [**Liveness**](liveness-detection-sdk/) — standalone face presentation attack detection (PAD) with no face matching: passive and active on mobile, passive on servers on port 8093.
 * [**Recognition + Liveness**](recognition-and-liveness/) — mobile Identify with 2D liveness, plus server face matching and `/api/liveness` on port 8092. **Recommended for eKYC**.
 
 ```mermaid
@@ -64,7 +64,7 @@ flowchart LR
 
 Start with [Capabilities](capabilities.md), for an overview, then open the mode you need.
 
-<table data-view="cards"><thead><tr><th></th><th></th><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td></td><td><strong>Capabilities</strong></td><td>Recognition, liveness, and recognition + liveness in one place.</td><td><a href="capabilities.md">capabilities.md</a></td></tr><tr><td></td><td><strong>Recognition</strong></td><td>Recognition-only server (no /api/liveness).</td><td><a href="recognition/">recognition</a></td></tr><tr><td></td><td><strong>Liveness</strong></td><td>Standalone face anti-spoofing on mobile and port 8084.</td><td><a href="liveness-detection-sdk/">liveness-detection-sdk</a></td></tr><tr><td></td><td><strong>Recognition + Liveness</strong></td><td>Mobile + combined server — recommended for eKYC.</td><td><a href="recognition-and-liveness/">recognition-and-liveness</a></td></tr></tbody></table>
+<table data-view="cards"><thead><tr><th></th><th></th><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td></td><td><strong>Capabilities</strong></td><td>Recognition, liveness, and recognition + liveness in one place.</td><td><a href="capabilities.md">capabilities.md</a></td></tr><tr><td></td><td><strong>Recognition</strong></td><td>Recognition-only server (no /api/liveness).</td><td><a href="recognition/">recognition</a></td></tr><tr><td></td><td><strong>Liveness</strong></td><td>Standalone face anti-spoofing: passive and active on mobile, passive on port 8093.</td><td><a href="liveness-detection-sdk/">liveness-detection-sdk</a></td></tr><tr><td></td><td><strong>Recognition + Liveness</strong></td><td>Mobile + combined server — recommended for eKYC.</td><td><a href="recognition-and-liveness/">recognition-and-liveness</a></td></tr></tbody></table>
 
 ### How to Call the Face Recognition SDK
 

@@ -44,7 +44,7 @@ This documentation shows you how to choose the right SDK, install it on your pla
 ### What you can build
 
 * **Passport OCR & ID verification** — classify and read **16,900** document templates from **255** countries (MRZ — the machine-readable zone on passports — plus barcode and optional authenticity). Start: [ID Document capabilities](products/id-document-recognition-sdk/capabilities.md) · [Passport OCR guide](help/resources/passport-ocr-and-id-verification.md)
-* **Face recognition & liveness** — offline 1:1 match, mobile 1:N Identify, standalone face anti-spoofing, or recognition + liveness in one server process. Start: [Face SDK capabilities](products/face-recognition-sdk/capabilities.md)
+* **Face recognition & liveness** — offline 1:1 match, mobile 1:N Identify, standalone face anti-spoofing (passive everywhere, plus active challenges on mobile), or recognition + liveness in one server process. Start: [Face SDK capabilities](products/face-recognition-sdk/capabilities.md)
 
 Product hubs: [Face SDK](products/face-recognition-sdk/) · [ID Document SDK](products/id-document-recognition-sdk/)&#x20;
 
@@ -58,7 +58,7 @@ This documentation is the **integration** layer: clone a public GitHub sample, a
 4. Copy the **machine code** if you run a server SDK, then [request a license](help/request-a-license-and-support.md).
 5. Use [Try it](getting-started/try-it.md) and the [HTTP API](integration/http-api/) to call the same server APIs from your app. Store templates and document JSON in **your** database.
 
-Ports: Document **8082**, Face Recognition **8092**, Face Liveness **8084**, Document Liveness **8086**.
+Ports: Document **8082**, Face Recognition **8092**, Face Liveness **8093**, Document Liveness **8086**.
 
 For topology and sizing, see [Deploy and host](integration/deploy-and-host/).
 
@@ -83,12 +83,12 @@ Each GitHub sample app is a complete application for testing. In production, use
 ### Features <a href="#feature" id="feature"></a>
 
 * Offline after license activation — no Faceplugin cloud inference
-* HTTP APIs on ports **8082** (documents), **8092** (face recognition), **8084** (face liveness), **8086** (document liveness)
-* Mobile SDKs for Android, iOS, Flutter, React Native, and Ionic (platform support varies by product)
+* HTTP APIs on ports **8082** (documents), **8092** (face recognition), **8093** (face liveness), **8086** (document liveness)
+* Mobile SDKs for Android, iOS, Flutter, React Native, Ionic and .NET MAUI (platform support varies by product)
 
 ### Platforms <a href="#platform" id="platform"></a>
 
-Platforms vary by product. **Face Recognition** and **ID Document Recognition** include Android, iOS, Flutter, React Native, Ionic, Windows, and Linux/Docker. **Face Liveness** is Android, iOS, Windows, and Linux/Docker (no public Flutter or React Native SDK).
+Platforms vary by product. **Face Recognition** and **ID Document Recognition** include Android, iOS, Flutter, React Native, Ionic, Windows, and Linux/Docker. **Face Liveness** covers nine platforms: Android, iOS, Flutter, React Native, Ionic Capacitor, Ionic Cordova and .NET MAUI on mobile (passive **and** active liveness), plus Windows and Linux/Docker on the server (passive only).
 
 ### Common Use Cases
 
@@ -109,7 +109,7 @@ The ID Document SDK recognizes 16,900 document templates from 255 countries, inc
 
 **Which platforms are supported?**
 
-Face Recognition and ID Document SDKs support Android, iOS, Flutter, React Native, Ionic, Windows and Linux/Docker. The Face Liveness SDK supports Android, iOS, Windows and Linux/Docker.
+Face Recognition and ID Document SDKs support Android, iOS, Flutter, React Native, Ionic, Windows and Linux/Docker. The Face Liveness SDK supports Android, iOS, Flutter, React Native, Ionic Capacitor, Ionic Cordova, .NET MAUI, Windows and Linux/Docker.
 
 **How do I get a license for a server SDK?**
 

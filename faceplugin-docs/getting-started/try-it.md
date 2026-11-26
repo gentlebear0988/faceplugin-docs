@@ -19,7 +19,7 @@ There is no need to build a UI first: check that the server is running, activate
 | ----------------------- | ------------ |
 | ID Document Recognition | 8082         |
 | Face Recognition        | 8092         |
-| Face Liveness           | 8084         |
+| Face Liveness           | 8093         |
 | ID Document Liveness    | 8086         |
 
 ### 1. Check the Server and Get Your Machine Code (No License Needed)
@@ -60,19 +60,19 @@ curl -s -X POST http://127.0.0.1:8092/api/match \
   -d "{\"image1\":\"$IMG\",\"image2\":\"$IMG\"}"
 ```
 
-Install: [Face Recognition Docker SDK](../products/face-recognition-sdk/recognition/server-sdk/face-recognition-linux-sdk.md) or [Windows](../products/face-recognition-sdk/recognition/server-sdk/face-recognition-windows-sdk.md). For anti-spoofing on the server, add [Face Liveness](../products/face-recognition-sdk/liveness-detection-sdk/server-sdk/) on port **8084**; on a phone, [Recognition + Liveness Mobile](../products/face-recognition-sdk/recognition-and-liveness/mobile-sdk/) does both on the device.
+Install: [Face Recognition Docker SDK](../products/face-recognition-sdk/recognition/server-sdk/face-recognition-linux-sdk.md) or [Windows](../products/face-recognition-sdk/recognition/server-sdk/face-recognition-windows-sdk.md). For anti-spoofing on the server, add [Face Liveness](../products/face-recognition-sdk/liveness-detection-sdk/server-sdk/) on port **8093**; on a phone, [Recognition + Liveness Mobile](../products/face-recognition-sdk/recognition-and-liveness/mobile-sdk/) does both on the device.
 {% endtab %}
 
 {% tab title="Face Liveness" %}
 ```bash
 IMG=$(base64 -w0 face.jpg)
 
-curl -s -X POST http://127.0.0.1:8084/api/liveness \
+curl -s -X POST http://127.0.0.1:8093/api/liveness \
   -H 'Content-Type: application/json' \
   -d "{\"image\":\"$IMG\"}"
 ```
 
-Score **≥ 0.5** is Real / pass. JPEG only. [Face Liveness Detection Linux SDK](../products/face-recognition-sdk/liveness-detection-sdk/server-sdk/liveness-detection-linux-sdk.md). Face Liveness runs as its own service on **8084**, beside Face Recognition on **8092**.
+The reply is an envelope: `{"success":true,"code":0,"message":"OK","data":{"score":0.72,"result":"Real","pass":true}}`. Score **≥ 0.5** is Real / pass. JPEG only. [Face Liveness Detection Linux SDK](../products/face-recognition-sdk/liveness-detection-sdk/server-sdk/liveness-detection-linux-sdk.md). Face Liveness runs as its own service on **8093**, beside Face Recognition on **8092**.
 {% endtab %}
 
 {% tab title="ID Document" %}
@@ -180,7 +180,7 @@ On the Face Liveness API, a score of 0.5 or higher means the face is real.
 
 **Which ports do the Faceplugin server APIs use?**
 
-ID Document Recognition uses 8082, Face Recognition 8092, Face Liveness 8084 and ID Document Liveness 8086.
+ID Document Recognition uses 8082, Face Recognition 8092, Face Liveness 8093 and ID Document Liveness 8086.
 
 ### Related documentation
 

@@ -43,7 +43,7 @@ Paths do **not** include `/v1`.
 | ----------------------- | -----------: | ---------------------------------------- |
 | ID Document Recognition |         8082 | OCR, MRZ, barcode, optional authenticity |
 | Face Recognition        |         8092 | Detect, quality, template, 1:1 match, 1:N identify |
-| Face Liveness           |         8084 | Score one face image for spoofing        |
+| Face Liveness           |         8093 | Score one face image for spoofing        |
 | ID Document Liveness    |         8086 | Document authenticity only               |
 
 **MRZ** means the machine-readable zone on a passport. **OCR** means reading printed text from the image.
@@ -76,7 +76,11 @@ Process routes do **not** use an envelope. They return the engine JSON as the HT
 
 Examples: `POST /api/detect`, `/api/liveness`, `/api/documentProcess`, `/api/documentRecognition`, `/api/documentLiveness`.
 
-Parse that JSON directly. Do not look for a `success` or `data` wrapper.
+Parse that JSON directly. Do not look for an added `success` or `data` wrapper.
+
+{% hint style="warning" %}
+One exception worth knowing: the Face Liveness engine's own JSON already has the envelope fields, so `POST /api/liveness` answers `{"success":true,"code":0,"message":"OK","data":{"score":…,"result":…,"pass":…}}`. The app passes that through verbatim. See [Face Liveness HTTP API](face-liveness.md).
+{% endhint %}
 
 {% hint style="info" %}
 `POST /api/activate` accepts raw `FP1.…` text, JSON `{"license":"FP1.…"}`, or a license file body. An empty body returns envelope `code: -1`.

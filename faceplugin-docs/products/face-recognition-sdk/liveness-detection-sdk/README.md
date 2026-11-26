@@ -1,8 +1,8 @@
 ---
 description: >-
   Faceplugin Face Liveness Detection SDK and anti-spoofing. On-premise passive
-  liveness for Android, iOS, Windows and Docker, with 0% BPCER on phone and
-  server in internal ISO/IEC 30107-3 testing. POST /api/liveness on port 8084.
+  and active liveness for Android, iOS, Flutter, React Native, .NET MAUI, Ionic,
+  Windows and Docker. POST /api/liveness on port 8093.
 icon: user-shield
 ---
 
@@ -14,7 +14,16 @@ icon: user-shield
 
 **What it can do:** [Face SDK capabilities](../capabilities.md) (Liveness section) — passive anti-spoofing, mobile vs server, and when to use it versus Face Recognition Identify.
 
-This product is **passive** anti-spoofing: no smile / turn-head challenge. Active challenge demos on GitHub are **not** this product, and the optional active prompts on some Face Recognition Identify flows are not this SDK either.
+The SDK runs liveness **two ways**, and the mobile demo apps ship both:
+
+* **Passive** — the engine scores a single frame. Nothing is asked of the user.
+* **Active** — the face is scored for spoofing **first**, and only a face that clears that gate is asked for a short, shuffled sequence of actions (blink, smile, turn your head). A recorded video cannot answer a sequence it has never seen, so the two together are the stronger check against replay.
+
+Active liveness is **mobile only**. The Windows and Linux server SDKs score one JPEG and are **passive only** — there is no challenge sequence over HTTP.
+
+{% hint style="info" %}
+Active liveness used to live in separate `Active-Liveness-Detection-*` demos on GitHub. It is now part of this product, built into every mobile SDK below. The passive 2D liveness inside Face Recognition Identify is still a different thing — see [Recognition + Liveness](../recognition-and-liveness/).
+{% endhint %}
 
 ### Evaluation results
 
@@ -51,27 +60,36 @@ Capable of detecting:
 * **3D models**
 * **Deepfakes** (handled as one type of spoof attack — not a separate deepfake product)
 
-**Mobile** apps run a live camera (VideoWorker plus `faceDetection`). **Linux and Windows** expose a Face Liveness **API**: one RGB JPEG over `POST /api/liveness`. Score **0.5 or higher** is Real / pass.
+**Mobile** apps run a live camera and add the guided active flow on top. **Linux and Windows** expose a Face Liveness **API**: one RGB JPEG over `POST /api/liveness`. Score **0.5 or higher** is Real / pass.
 
 ### Platforms
 
 Start with [Face SDK capabilities](../capabilities.md), then **Mobile SDK** or **Server SDK**.
 
-<table data-view="cards"><thead><tr><th></th><th></th><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td></td><td><strong>Capabilities</strong></td><td>Face SDK capabilities — Recognition, Liveness, Recognition + Liveness.</td><td><a href="../capabilities.md">capabilities.md</a></td></tr><tr><td></td><td><strong>Mobile SDK</strong></td><td>Android and iOS. Live camera anti-spoofing.</td><td><a href="mobile-sdk/">mobile-sdk</a></td></tr><tr><td></td><td><strong>Server SDK</strong></td><td>Windows and Linux / Docker. JPEG over HTTP on port 8084.</td><td><a href="server-sdk/">server-sdk</a></td></tr></tbody></table>
+<table data-view="cards"><thead><tr><th></th><th></th><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td></td><td><strong>Capabilities</strong></td><td>Face SDK capabilities — Recognition, Liveness, Recognition + Liveness.</td><td><a href="../capabilities.md">capabilities.md</a></td></tr><tr><td></td><td><strong>Mobile SDK</strong></td><td>Android, iOS, Flutter, React Native, .NET MAUI and Ionic. Passive and active liveness.</td><td><a href="mobile-sdk/">mobile-sdk</a></td></tr><tr><td></td><td><strong>Server SDK</strong></td><td>Windows and Linux / Docker. JPEG over HTTP on port 8093. Passive only.</td><td><a href="server-sdk/">server-sdk</a></td></tr></tbody></table>
 
 ### Use cases
 
-* **KYC / onboarding selfies** — confirm a live person before face match (`faceDetection` / `POST /api/liveness`)
+* **KYC / onboarding selfies** — confirm a live person before face match, passively or with a challenge sequence
 * **Banking and fintech** — block photo and screen replay attacks on selfie capture
 * **Access control** — reject printouts and phone-screen spoofs at entry
 * **Exam proctoring** — score camera frames for presentation attacks without a challenge animation
-* **Fraud prevention** — JPEG anti-spoofing on your server (port **8084**)
+* **High-value or step-up flows** — require the active sequence when the passive score alone is not enough
+* **Fraud prevention** — JPEG anti-spoofing on your server (port **8093**)
 
 ### Frequently Asked Questions
 
 **What is passive liveness detection?**&#x20;
 
 The engine scores a camera frame or JPEG without a user challenge animation. See [Face SDK capabilities](../capabilities.md).
+
+**Does Faceplugin support active liveness?**
+
+Yes, on mobile. The active flow scores the face for spoofing first and only then asks for a shuffled sequence of actions — blink, smile, turn left or right, look up or down. The server SDKs are passive only.
+
+**Should I use passive or active?**
+
+Passive when a refused genuine user is the expensive outcome and you want no friction. Active when you need replay resistance a single frame cannot give you. They are not exclusive: the active flow runs the passive gate first, and reports both results.
 
 **What is the difference between this and Face Recognition liveness?**
 

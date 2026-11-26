@@ -1,13 +1,13 @@
 ---
 description: >-
   Faceplugin Face Liveness Detection Windows SDK. Fully on-premise PAD HTTP API
-  on port 8084. POST /api/liveness.
+  on port 8093. POST /api/liveness.
 icon: windows
 ---
 
 # Windows
 
-Fully on-premise **Face Liveness HTTP API for Windows**. Default port **8084**. Gradio **9004**. No Docker on Windows.
+Fully on-premise **Face Liveness HTTP API for Windows**. Default port **8093**. Gradio **9093**. No Docker on Windows.
 
 Score **one RGB JPEG**. Score **≥ 0.5** → Real / `pass` true. Same HTTP API as [Face Liveness Detection Linux SDK](liveness-detection-linux-sdk.md). `POST /api/check_liveness` is an alias of `/api/liveness`.
 
@@ -39,7 +39,7 @@ run.bat
 #### Copy the machine code
 
 ```
-curl -s http://127.0.0.1:8084/api/machinecode
+curl -s http://127.0.0.1:8093/api/machinecode
 ```
 
 Send machine code to Faceplugin.
@@ -49,12 +49,12 @@ Send machine code to Faceplugin.
 #### Activate, then check liveness
 
 ```
-curl -s -X POST http://127.0.0.1:8084/api/activate \
+curl -s -X POST http://127.0.0.1:8093/api/activate \
   -H 'Content-Type: text/plain' \
   --data-binary @license.txt
 
 IMG=$(base64 -w0 face.jpg)
-curl -s -X POST http://127.0.0.1:8084/api/liveness \
+curl -s -X POST http://127.0.0.1:8093/api/liveness \
   -H 'Content-Type: application/json' \
   -d "{\"image\":\"$IMG\"}"
 ```
@@ -75,7 +75,16 @@ curl -s -X POST http://127.0.0.1:8084/api/liveness \
 
 Full reference: [Face Liveness HTTP API](../../../../integration/http-api/face-liveness.md). Shared control routes: [Shared endpoints](../../../../integration/http-api/shared.md).
 
-Some routes wrap the result in a small JSON object (an **envelope**). `POST /api/liveness` returns **engine JSON** as the body. Score **≥ 0.5** → Real / `pass` true.
+Control routes return the Flask **envelope**. `POST /api/liveness` passes the engine's own JSON through verbatim, and that JSON is shaped the same way:
+
+```json
+{ "success": true, "code": 0, "message": "OK",
+  "data": { "score": 0.72, "result": "Real", "pass": true } }
+```
+
+`pass` is `score >= 0.5`, and `result` is `"Real"` or `"Spoof"`. That cut-off is fixed in native code and is **not** configurable over HTTP — apply your own to `score` if you need a different one.
+
+Failures come back the same way: no face gives `code` **2** with `message` `"NO_FACE"`, another engine error gives **-19**, a missing or empty `image` gives **-19** with `"Image not suitable"`, and a key without liveness gives **8** with a `licenseError`.
 
 Python:
 
@@ -91,17 +100,17 @@ print(sdk.liveness(base64_jpeg))
 ### Try it
 
 ```bash
-curl -s http://127.0.0.1:8084/api/health
+curl -s http://127.0.0.1:8093/api/health
 IMG=$(base64 -w0 face.jpg)
 
-curl -s -X POST http://127.0.0.1:8084/api/liveness \
+curl -s -X POST http://127.0.0.1:8093/api/liveness \
   -H 'Content-Type: application/json' \
   -d "{\"image\":\"$IMG\"}"
 ```
 
-**Postman:** import `postman/FaceLiveness-API.postman_collection.json` from the repo. Base URL `http://127.0.0.1:8084`.
+**Postman:** import `postman/FaceLiveness-API.postman_collection.json` from the repo. Base URL `http://127.0.0.1:8093`.
 
-**Gradio (host only):** `DEMO_PORT=9004 API_BASE=http://127.0.0.1:8084 python demo.py`.
+**Gradio (host only):** `DEMO_PORT=9093 API_BASE=http://127.0.0.1:8093 python demo.py`.
 
 [Request a License & Support](../../../../help/request-a-license-and-support.md) · [Contact us](../../../../help/contact-us.md)
 
@@ -109,11 +118,15 @@ curl -s -X POST http://127.0.0.1:8084/api/liveness \
 
 **Which liveness API does the Windows SDK use?**
 
-The same as Linux: `POST /api/liveness` on port 8084. Docker is not used on Windows.
+The same as Linux: `POST /api/liveness` on port 8093. Docker is not used on Windows.
 
 **Does it support active liveness detection?**
 
-No. This product does passive anti-spoofing on a single JPEG only, with no challenge for the user.
+Not over HTTP. The server scores a single JPEG, passively. Active liveness — an anti-spoofing gate followed by a shuffled challenge sequence — is part of the [Mobile SDK](../mobile-sdk/).
+
+**Can I choose a lighter or faster model?**
+
+No. There is no algorithm or model parameter. The runtime fuses its own estimators into the one score it returns.
 
 **What score counts as a real face?**
 
@@ -125,7 +138,7 @@ No. The Windows SDK runs natively with Python and `run.bat`.
 
 **Can I run face recognition and liveness on the same Windows server?**
 
-Yes. Run the Face Recognition Windows SDK on port 8092 and the Face Liveness Windows SDK on port 8084 as separate processes.
+Yes. Run the Face Recognition Windows SDK on port 8092 and the Face Liveness Windows SDK on port 8093 as separate processes.
 
 ### Related documentation
 

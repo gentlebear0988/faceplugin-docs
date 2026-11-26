@@ -36,7 +36,7 @@ Process POSTs return **engine JSON**. There is **no** `POST /api/identify` on th
 
 A call without a recognition license returns `code` 8 with `licenseError`.
 
-Face liveness is a separate service on port **8084** — see [`POST /api/liveness`](face-liveness.md).
+Face liveness is a separate service on port **8093** — see [`POST /api/liveness`](face-liveness.md).
 
 Install and run: [Face Recognition Linux SDK](../../products/face-recognition-sdk/recognition/server-sdk/face-recognition-linux-sdk.md) · [Face Recognition Windows SDK](../../products/face-recognition-sdk/recognition/server-sdk/face-recognition-windows-sdk.md).
 

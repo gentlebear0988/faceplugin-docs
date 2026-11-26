@@ -1,22 +1,46 @@
 ---
 description: >-
-  Faceplugin Face Liveness Detection iOS SDK. On-premise PAD against photos,
-  screens, masks, and deepfakes. Xcode frameworks, setActivation, initSDK,
-  detectImage.
+  Faceplugin Face Liveness Detection iOS SDK. On-premise passive and active PAD
+  against photos, screens, masks, and deepfakes.
 icon: apple
+layout:
+  width: default
+  title:
+    visible: true
+  description:
+    visible: true
+  tableOfContents:
+    visible: true
+  outline:
+    visible: true
+  pagination:
+    visible: true
+  metadata:
+    visible: true
+  tags:
+    visible: true
+  actions:
+    visible: true
+  anchors:
+    visible: true
 ---
 
 # iOS
 
-Fully on-premise **Face Liveness SDK for iOS**. Native class: `FaceLivenessSDK`.
+Fully on-premise **Face Liveness SDK for iOS** (presentation-attack detection), with both **passive** scoring and a guided **active** challenge flow. The demo does not enroll people or run 1:N search.
 
-| What                                             | Id                                              |
-| ------------------------------------------------ | ----------------------------------------------- |
-| iOS demo app (Xcode `PRODUCT_BUNDLE_IDENTIFIER`) | `com.faceplugin.faceliveness.app`               |
-| Android demo package name                        | `com.faceplugin.faceliveness`                   |
-| SDK class / framework                            | `FaceLivenessSDK` in `facelivenessdk.framework` |
+| What                  | Id                                 |
+| --------------------- | ---------------------------------- |
+| iOS bundle identifier | `com.faceplugin.faceliveness.app`  |
+| Xcode scheme          | `FaceLivenessDetectioniOS`         |
+| Engine class          | `FaceRecognitionSDK`               |
+| Kit entry point       | `FaceEngine.shared`                |
 
-Keep the iOS demo bundle **`com.faceplugin.faceliveness.app`** so the included license works. Request a new license key if you change it.
+Keep the bundle id **`com.faceplugin.faceliveness.app`** so the sample license key keeps working.
+
+{% hint style="warning" %}
+**This build changed engines.** Earlier releases shipped `facelivenessdk.framework`, `FaceLivenessEngine.framework` and `onnxruntime.framework`. Those are retired. The SDK now runs on the Face Recognition engine bundles, and licences are checked by that runtime — a key issued for the old one will not activate. [Request a new key](../../../../help/request-a-license-and-support.md).
+{% endhint %}
 
 ### Code <a href="#setup" id="setup"></a>
 
@@ -24,88 +48,150 @@ Keep the iOS demo bundle **`com.faceplugin.faceliveness.app`** so the included l
 
 ### Setup <a href="#setup" id="setup"></a>
 
-1. Unzip the frameworks from [Google Drive](https://drive.google.com/drive/folders/1HzREOmFg9kBLbuso1e57j8Hk5Jk41kyr): `facelivenessdk.framework`, `FaceLivenessEngine.framework`, `onnxruntime.framework`.
-2. Add the SDK frameworks to the project in Xcode (**Embed & Sign**).
-3. Add `FaceLivenessSDK-Bridging-Header.h` to Build Settings.
+{% stepper %}
+{% step %}
+#### Get the engine bundles
+
+Download the four bundles from the [iOS release](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-iOS/releases/tag/latest) and place them at the repository root, next to `FaceLivenessSDK.xcodeproj`:
+
+`facerecognitionsdk.framework`, `FacePluginSDK.xcframework`, `FacePlugin.xcframework`, `FaceDetect.xcframework`
+
+All four are **device only** (`ios-arm64`), which is why the app runs on a physical iPhone and not in the simulator.
+{% endstep %}
+
+{% step %}
+#### Embed them
+
+Add all four to the target with **Embed & Sign**.
+
+Inside `FacePlugin.xcframework` the `ios-arm64` slice is named **`FacePPlugin.framework`**, with two Ps. That is deliberate — linker flags and any host that embeds the slice directly must use that name.
+{% endstep %}
+
+{% step %}
+#### Add the kit
+
+Add **FaceLivenessKit** for the engine lifecycle, and copy the `ActiveLiveness` group if you want the guided screen. Add `NSCameraUsageDescription` to `Info.plist`.
+{% endstep %}
+
+{% step %}
+#### Start the engine
+
+Activate once at launch. It runs off the main thread on its own:
+
+```swift
+FaceEngine.shared.start(license: "YOUR_LICENSE_KEY") { code in
+    // code == 0 once the engine is ready
+}
+```
+{% endstep %}
+{% endstepper %}
+
+Minimum deployment target **iOS 15.0**.
 
 Status codes: **0** Success, **1** Invalid license, **2** Expired, **3** Not activated, **4** Init failed.
 
-### APIs
+### Passive liveness
 
-#### <mark style="color:orange;">setActivation:</mark> This API is used to activate the SDK <a href="#setactivation" id="setactivation"></a>
-
-```objectivec
-+(int)setActivation:(NSString*)license;
+```swift
+let faces = FaceEngine.shared.detect(image, options: .passive)
+if let face = faces.first, face.liveness >= 0.5 {
+    // Real
+}
 ```
 
-| **Input**        | <ul><li><strong>license</strong> (NSString*): The license string (<code>license key</code>)</li></ul>                                                            |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Return value** | <p>The SDK activation status code.</p><ul><li>0: Success</li><li>1: Invalid license</li><li>2: Expired</li><li>3: Not activated</li><li>4: Init failed</li></ul> |
+The liveness score ranges from 0.0 to 1.0. **0.5 or higher** is treated as Real. That is the demo default.
 
-#### <mark style="color:orange;">initSDK:</mark> This API is used to initialize the SDK <a href="#initsdk" id="initsdk"></a>
+### Active liveness
 
-```objectivec
-+(int)initSDK;
+One attempt runs in three stages: **align**, then a **passive anti-spoofing gate**, then a shuffled sequence of **challenges**. Below the gate threshold the attempt ends and **no challenge is asked** — a printed photo or a replayed video is never invited to blink. Losing the face for about a second restarts the whole attempt, gate included.
+
+The screen is one view controller, presented with a completion:
+
+```swift
+ActiveLivenessViewController.present(from: self, options: ActiveLivenessOptions()) { result in
+    guard let result else { return }          // closed before it finished
+    if result.passed {
+        // live person
+    } else if !result.passivePassed {
+        // turned away at the anti-spoofing gate
+    } else {
+        // a challenge was not completed: result.failedCheck
+    }
+}
 ```
 
-#### <mark style="color:orange;">getMachineCode:</mark> This API is used to retrieve the machine code <a href="#getmachinecode" id="getmachinecode"></a>
+`FaceEngine.shared.start` has to have succeeded first.
 
-```objectivec
-+(NSString*)getMachineCode;
+#### How the checks are judged
+
+The sequence lives in `ActiveLivenessSession`, over the per-frame attributes the engine reports — the passive liveness score drives the gate, `Pan` / `Tilt` in degrees drive the turn and tilt challenges, eye openness drives blink, and the smile estimate drives smile.
+
+| Challenge | Satisfied when |
+| --------- | -------------- |
+| Blink | Eye openness drops to the eye-closed threshold and recovers, **Blinks required** times |
+| Smile | The smile estimate reaches the smile threshold |
+| Turn left / right | Yaw passes the turn angle in that direction |
+| Look up / down | Pitch passes the tilt angle in that direction |
+| Move closer | The face box grows by the move-closer fraction from where the challenge started |
+
+Each challenge must be held for two frames running, and fails if **frames allowed per stage** elapse first.
+
+#### When a face cannot be checked
+
+`ActiveLivenessSession.Notice` names what is wrong rather than leaving the user holding still against a frame that will never pass: move closer, move back a little, move your face into the middle, look straight at the camera, too dark or blurry, cannot read your face, only one face please. These apply while the face is being framed and scored — a challenge deliberately turns the head away, so the pose and quality checks step aside once the challenges start.
+
+{% hint style="info" %}
+**Head-pose direction.** Which way is positive for yaw and pitch is a property of the engine build. If a turn challenge accepts the opposite direction on your device, flip **Settings → Invert left / right** (or **Invert up / down**).
+{% endhint %}
+
+### Defaults
+
+| Setting | Default |
+| ------- | ------- |
+| Challenges asked | **3**, drawn at random from a pool of 6 |
+| Liveness threshold (the gate) | **0.5** |
+| Passive samples averaged at the gate | **3** |
+| Frames allowed per stage | **150** |
+| Yaw / pitch | **25°** / **15°** |
+| Smile / blink | **0.5** / **0.3**, **2** blinks required |
+| Move-closer fraction | **0.15** |
+| Align angle / minimum face fraction / quality | **12°** / **0.3** / **0.3** |
+
+`ActiveLivenessResult` carries `passed`, `failure` (`none`, `spoof`, `check`, `timeout`, `cancelled`), `passiveScore`, `passivePassed`, `challenges`, `outcomes` and `durationMs`.
+
+### Non-Swift hosts
+
+Swift-only API — structs, enums with associated values — is invisible to Objective-C and therefore to anything that binds a framework through its generated header: .NET MAUI, Xamarin, Unity, Cordova's Objective-C plugin API.
+
+**FaceLivenessBridge** is a framework target in the project whose only job is to put an `@objc` face on the same screens: `FPLEngine`, `FPLActiveOptions`, `FPLActiveResult`, `FPLLiveness`, all `NSObject`s and `Int`-backed enums. It adds no behaviour and compiles the *same source files* the app does, so the two cannot drift.
+
+```bash
+./scripts/build_bridge.sh            # → build/xcframeworks/
 ```
 
-#### <mark style="color:orange;">getLicenseStatus:</mark> This API is used to read license status <a href="#getlicensestatus" id="getlicensestatus"></a>
+That produces `FaceLivenessBridge.xcframework` and `FaceLivenessKit.xcframework`, which a host embeds along with the four engine bundles. **Device only** (`ios-arm64`). The wire values it reports — challenge keys, outcome and failure names — are the ones Android uses, so a cross-platform host can treat both platforms identically. The [.NET MAUI SDK](liveness-detection-dot-net-maui-sdk.md) is built on it.
 
-```objectivec
-+(NSString*)getLicenseStatus;
-+(BOOL)allowsLiveness;
-+(NSString*)lastLicenseError;
-```
-
-#### <mark style="color:orange;">detectImage:</mark> This API is used to detect faces and determine if the faces are real or fake <a href="#detectimage" id="detectimage"></a>
-
-```objectivec
-+(NSString*)detectImage:(UIImage*)image crop:(BOOL)crop flags:(int)flags;
-```
-
-| **Input**        | <ul><li><strong>image</strong> (UIImage*): The input image</li></ul> |
-| ---------------- | -------------------------------------------------------------------- |
-| **Return value** | JSON string with detected faces and liveness scores.                 |
-
-The liveness score ranges from 0.0 to 1.0. If it's greater than the threshold, it's real face. Demo default threshold is **0.5**.
-
-#### <mark style="color:orange;">VideoWorker:</mark> This API is used for the live camera HUD <a href="#videoworker" id="videoworker"></a>
-
-```objectivec
-+(int)startVideoWorkerWithMatchThreshold:(float)threshold;
-+(int)addVideoWorkerFrame:(UIImage*)image;
-+(int)addVideoWorkerSampleBuffer:(CMSampleBufferRef)sampleBuffer;
-+(void)stopVideoWorker;
-```
-
-The liveness demo does **not** enroll a match database.
-
-#### <mark style="color:orange;">deinitSDK:</mark> This API is used to unload the engine <a href="#deinitsdk" id="deinitsdk"></a>
-
-```objectivec
-+(int)deinitSDK;
-```
+Objective-C and Swift apps should use `FaceLivenessKit` and the screens directly; the bridge exists only for hosts that cannot read a Swift interface.
 
 ### Run the demo
 
-1. Place `facelivenessdk`, `FaceLivenessEngine`, and `onnxruntime` frameworks (see Setup).
-2. Keep the Xcode bundle id **`com.faceplugin.faceliveness.app`**.
-3. Run on a **physical** iPhone. Home tiles: **Liveness**, Settings, About. The demo does **not** enroll a match database.
+1. Place the four engine bundles at the repository root (see Setup).
+2. Open `FaceLivenessSDK.xcodeproj`, select scheme **FaceLivenessDetectioniOS**, set your **Team**.
+3. Keep the bundle id **`com.faceplugin.faceliveness.app`**.
+4. Prefer a **USB** iPhone — Wi‑Fi debugging often hangs LLDB. Or run `python3 run_ios`.
+5. Home tiles: **Active liveness**, **Passive liveness**, Settings, About.
 
 ### Screenshots
 
-Sample demo UI from `faceplugin-assets` (`face-liveness/mobile/`). Not a dedicated iOS photoshoot.
+The demo is the same four-screen app on every platform.
 
-| Home                                                                                                                                                                                                                                                                  | Liveness                                                                                                                                                                                          | Settings                                                                                                                                                                                       | About                                                                                                                                                                                    |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-liveness/mobile/home.png" alt="Faceplugin Face Liveness sample demo home (mobile UI from faceplugin-assets, not a dedicated iOS photoshoot)" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-liveness/mobile/liveness.png" alt="Faceplugin Face Liveness live camera" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-liveness/mobile/settings.png" alt="Faceplugin Face Liveness settings" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-liveness/mobile/about.png" alt="Faceplugin Face Liveness About" data-size="original"> |
+| Home | Active liveness | Active result | Passive liveness |
+| ---- | --------------- | ------------- | ---------------- |
+| <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-liveness/mobile/home.gif" alt="Faceplugin Face Liveness home" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-liveness/mobile/active_start.gif" alt="Faceplugin Face Liveness guided active challenge sequence" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-liveness/mobile/active_result.png" alt="Faceplugin Face Liveness active result" data-size="original"> | <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-liveness/mobile/passive.png" alt="Faceplugin Face Liveness passive camera anti-spoofing" data-size="original"> |
 
-Score **≥ 0.5** → real. Call `setActivation` → `initSDK` off the main thread.
+### License
+
+Licenses are **offline** and bound to your bundle identifier. The sample key covers `com.faceplugin.faceliveness.app` only. After activation, `FaceEngine.shared.licenseStatus()` reports what the key unlocks — **Liveness only** and **Recognition + Liveness** both unlock the liveness screens.
 
 [Request a License & Support](../../../../help/request-a-license-and-support.md) · [Contact us](../../../../help/contact-us.md)
 
@@ -113,15 +199,19 @@ Score **≥ 0.5** → real. Call `setActivation` → `initSDK` off the main thre
 
 **Is the iOS SDK passive or active liveness detection?**
 
-Passive. It scores the face in a camera frame or image, with no challenge for the user.
+Both. It scores the face in a camera frame or image passively, and ships a guided active flow with an anti-spoofing gate and a shuffled challenge sequence.
 
 **What liveness threshold should I use on iOS?**
 
-Treat a score of 0.5 or higher as real. This is the demo default.
+Treat a score of 0.5 or higher as real. This is the demo default and the default gate threshold.
 
 **Which frameworks do I need?**
 
-`facelivenessdk.framework`, `FaceLivenessEngine.framework` and `onnxruntime.framework`, all added with Embed & Sign.
+`facerecognitionsdk.framework`, `FacePluginSDK.xcframework`, `FacePlugin.xcframework` and `FaceDetect.xcframework`, all added with Embed & Sign. The older `facelivenessdk` / `FaceLivenessEngine` / `onnxruntime` set is retired.
+
+**Why does the app not run in the simulator?**
+
+The engine ships no simulator slice. All four bundles are `ios-arm64` device only.
 
 **Can I change the demo's bundle ID?**
 

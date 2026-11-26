@@ -22,19 +22,19 @@ A library that detects faces, extracts a template (embedding), and compares temp
 
 ### Is there a Face Recognition API?
 
-Yes. Linux Docker and Windows expose an HTTP API on port **8092** (`/api/detect`, `/api/match`, `/api/similarity`). The separate Face Liveness service packages also expose `/api/liveness` on the same port. Full reference: [Face Recognition HTTP API](../../integration/http-api/face-recognition.md). Overview: [HTTP API](../../integration/http-api/).
+Yes. Linux Docker and Windows expose an HTTP API on port **8092** (`/api/detect`, `/api/match`, `/api/similarity`). The separate Face Liveness service exposes `/api/liveness` on its own port, **8093**. Full reference: [Face Recognition HTTP API](../../integration/http-api/face-recognition.md). Overview: [HTTP API](../../integration/http-api/).
 
 ### What is passive liveness detection?
 
-The engine scores a camera frame or JPEG **without** a smile / turn-head challenge. Faceplugin Face SDK **Liveness** is **passive** anti-spoofing. These docs do **not** claim iBeta certification. Contact Faceplugin if you need a certification statement. See [Face SDK capabilities](../../products/face-recognition-sdk/capabilities.md).
+The engine scores a camera frame or JPEG **without** a smile / turn-head challenge. It is the only mode the Face Liveness server SDK offers, and the default mode on mobile. These docs do **not** claim iBeta certification. Contact Faceplugin if you need a certification statement. See [Face SDK capabilities](../../products/face-recognition-sdk/capabilities.md).
 
 ### What is the difference between active and passive liveness?
 
-**Passive:** no user challenge—used in the Face Liveness SDK and in Face Recognition’s Identify mode. **Active:** separate GitHub demos with smile/turn prompts (`Active-Liveness-Detection-Android` / `-iOS`); they are **not** the Face Liveness SDK. Face Liveness on Linux/Windows is still `POST /api/liveness` on one JPEG.
+**Passive:** no user challenge—the engine scores a single frame. Used on the server and in Face Recognition’s Identify mode. **Active:** part of the Face Liveness **mobile** SDK. The face is scored for spoofing first, as an anti-spoofing gate; only a face that clears the gate is asked for a short shuffled sequence of challenges (blink, smile, turn left/right, look up/down, move closer), and the result reports the gate score plus every challenge outcome. Face Liveness on Linux/Windows stays passive: `POST /api/liveness` on one JPEG.
 
 ### Face Recognition liveness vs Face Liveness SDK?
 
-Identify on mobile includes **2D liveness** as part of matching. Standalone Face SDK **Liveness** is **anti-spoofing only** (no enroll / 1:N). See [Face SDK capabilities](../../products/face-recognition-sdk/capabilities.md).
+Identify on mobile includes passive **2D liveness** as part of matching. Standalone Face SDK **Liveness** is **anti-spoofing only** (no enroll / 1:N), and on mobile it adds an active challenge mode. See [Face SDK capabilities](../../products/face-recognition-sdk/capabilities.md).
 
 ### Can face recognition work completely offline?
 
@@ -50,7 +50,7 @@ Not for inference after activation. You need a network only to clone GitHub, pul
 
 ### Does Faceplugin support Flutter?
 
-Yes for Face Recognition and ID Document Recognition (`face_recognition_sdk`, `document_reader_sdk`). There is **no** public Face Liveness Flutter SDK — use Face Recognition’s 2D liveness on Identify and/or native Android/iOS Liveness.
+Yes for Face Recognition, Face Liveness and ID Document Recognition (`face_recognition_sdk`, `face_liveness_sdk`, `document_reader_sdk`). Face Liveness also ships React Native (`face-liveness-sdk`), Ionic Capacitor (`face-liveness-capacitor`), Ionic Cordova (`face-liveness-cordova`) and .NET MAUI, beside Android and iOS.
 
 ### Does Faceplugin support iOS?
 
@@ -70,7 +70,7 @@ Sample keys are bound to the **demo** application id / bundle id on the platform
 
 ### Match and liveness thresholds
 
-Mobile Identify default match **0.67**. Face Liveness server: score **≥ 0.5** → Real / pass. Change these defaults only if Faceplugin support gives you different recommended thresholds for your license.
+Mobile Identify default match **0.67**. Face Liveness server: score **≥ 0.5** → Real / pass; that verdict threshold is hard-coded in the native engine and is not configurable over HTTP, so apply your own cut-off to the returned `score` if you need a stricter one. Change the mobile defaults only if Faceplugin support gives you different recommended thresholds for your license.
 
 ### How large is the Android SDK?
 

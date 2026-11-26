@@ -9,18 +9,18 @@ icon: scale-balanced
 
 [Luxand FaceSDK](https://www.luxand.com/facesdk/) is a long-running **on-premise face library** (Windows, Linux, macOS, iOS, Android, plus language bindings). It documents **passive and active** liveness and thermal-camera liveness. Luxand.cloud is a **separate cloud FaceAPI**. Public reviews describe FaceSDK as face matching/liveness **without** a document-verification product.
 
-Faceplugin adds a **document recognition** SDK (passport OCR, MRZ, barcode) and **document liveness**, plus Linux/Windows **HTTP Docker APIs** and Flutter / React Native / Ionic Face Recognition and Document plugins.
+Faceplugin adds a **document recognition** SDK (passport OCR, MRZ, barcode) and **document liveness**, plus Linux/Windows **HTTP Docker APIs** and Flutter / React Native / Ionic / .NET MAUI plugins for Face Recognition, Face Liveness and Document.
 
 | Criterion                      | Faceplugin                                                                        | Luxand FaceSDK                  |
 | ------------------------------ | --------------------------------------------------------------------------------- | ------------------------------- |
 | On-premise / offline           | Yes                                                                               | Yes (FaceSDK; FaceAPI is cloud) |
 | Android / iOS                  | Yes                                                                               | Yes                             |
-| Flutter / React Native / Ionic | Yes (FR + Document)                                                               | Check vendor                    |
+| Flutter / React Native / Ionic | Yes (FR + Liveness + Document)                                                    | Check vendor                    |
 | Windows / Linux                | Yes                                                                               | Yes                             |
 | macOS SDK                      | Check vendor                                                                      | Yes (FaceSDK site)              |
 | Face recognition               | Yes                                                                               | Yes                             |
 | Passive liveness               | Yes                                                                               | Yes (documented)                |
-| Active liveness                | Public GitHub: Active-Liveness-Detection-Android / iOS. Not the Face Liveness SDK | Yes (Tracker API samples)       |
+| Active liveness                | Yes — built into the Face Liveness mobile SDK (anti-spoofing gate, then challenges) | Yes (Tracker API samples)       |
 | Passport OCR / ID card SDK     | Yes                                                                               | No (public FaceSDK positioning) |
 | Document liveness              | Yes                                                                               | Check vendor                    |
 | HTTP Docker Hub images         | Yes                                                                               | Check vendor                    |
